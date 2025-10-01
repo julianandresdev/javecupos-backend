@@ -3,6 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { UsersModule } from './users/users.module';
+import { UserEntity } from './users/entities/user.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -20,7 +22,7 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
         const baseConfig = {
           synchronize: configService.get('DB_SYNCHRONIZE') === 'true',
           logging: configService.get('DB_LOGGING') === 'true',
-          entities: [],
+          entities: [UserEntity],
         };
 
         // Para SQLite solo necesitamos el archivo de base de datos
@@ -45,6 +47,7 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
       },
       inject: [ConfigService],
     }),
+    UsersModule,
 
     ],
   controllers: [AppController],
