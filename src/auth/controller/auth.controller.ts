@@ -9,11 +9,9 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
-import { UsersService } from '../../users/services/users.service';
 import { CreateUserDto } from '../../users/dto/user.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
-import { UsersController } from 'src/users/controllers/users.controller';
 import { LoginDto } from '../dto/login.dto';
 
 @Controller('auth')
@@ -32,8 +30,8 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(@Body() _dto: LoginDto, @Request() req) {
+    return this.authService.login(req.user);
   }
 
   // 🟢 Ruta protegida (ejemplo)
