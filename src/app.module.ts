@@ -3,6 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { CuposService } from './cupos/services/cupos.service';
+import { CuposModule } from './cupos/cupos.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -45,9 +47,12 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
       },
       inject: [ConfigService],
     }),
+  
+  
+    CuposModule,
 
     ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, CuposService],
 })
 export class AppModule {}
