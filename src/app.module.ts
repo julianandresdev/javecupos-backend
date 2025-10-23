@@ -6,6 +6,7 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { UserEntity } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
+import { CuposService } from './cupos/services/cupos.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -49,9 +50,10 @@ import { AuthModule } from './auth/auth.module';
       inject: [ConfigService],
     }),
     UsersModule,
-    AuthModule
+    AuthModule  
+    CuposModule,
     ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, CuposService],
 })
 export class AppModule {}
