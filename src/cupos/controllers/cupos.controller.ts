@@ -1,13 +1,19 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, Post, Body } from '@nestjs/common';
+import { CuposService } from '../services/cupos.service';
+import { CreateCupoDto } from '../dto/cupos.dto';
+import type { Cupo } from '../interface/cupos.interface';
 
 @Controller('cupos')
 export class CuposController {
+  constructor(private readonly cuposService: CuposService) {}
 
-    /**
-     * @param cuposService Inyecta el servicio de cupos
-     * 
-     */
+  @Post()
+  create(@Body() createCupoDto: CreateCupoDto): Cupo {
+    return this.cuposService.create(createCupoDto);
+  }
 
-    constructor() {}
-
+  @Get()
+  findAll(): Cupo[] {
+    return this.cuposService.findAll();
+  }
 }
