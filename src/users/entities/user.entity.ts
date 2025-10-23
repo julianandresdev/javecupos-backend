@@ -1,6 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { UserRole, UserStatus } from '../interfaces/user.interface';
 
+
+
 /**
  * Entidad que representa a un usuario en el sistema
  * Cada usuario tiene propiedades como nombre, correo, contraseña, teléfono, avatar, edad, rol y estado

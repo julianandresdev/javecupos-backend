@@ -112,3 +112,18 @@ export class UserResponseDto {
     createdAt: Date; // Fecha de creación del usuario
     updatedAt: Date; // Fecha de la última actualización del usuario
 }
+
+export class UserResponseDtoBcrypt {
+    id: number; // ID único del usuario
+    name: string; // Nombre del usuario
+    email: string; // Correo electrónico del usuario
+    password: string;
+    phone: number; // Número de teléfono del usuario
+    online: boolean; // Indica si el usuario está en línea
+    avatar?: string; // URL del avatar del usuario (opcional)
+    age: number; // Edad del usuario
+    role: string; // Rol del usuario (por ejemplo, 'admin', 'user', etc.)
+    status: string; // Estado actual del usuario
+    createdAt: Date; // Fecha de creación del usuario
+    updatedAt: Date; // Fecha de la última actualización del usuario
+}

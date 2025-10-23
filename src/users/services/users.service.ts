@@ -13,6 +13,7 @@ import {
   SearchUserDto,
   UpdateUserDto,
   UserResponseDto,
+  UserResponseDtoBcrypt,
 } from '../dto/user.dto';
 @Injectable()
 export class UsersService {
@@ -109,6 +110,20 @@ export class UsersService {
     }
 
     return this.mapToResponseDto(user);
+  }
+
+  async findByEmail(email: string): Promise<UserResponseDtoBcrypt | null> {
+    console.log("Buscando usuario con email", email)
+
+    const user = await this.userRepository.findOne({
+      where: { email }
+    })
+
+    if(!user) {
+      return null
+    }
+
+    return this.mapToResponseDtoBcrypt(user);
   }
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
@@ -244,6 +259,28 @@ export class UsersService {
       id: user.id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
+      online: user.online,
+      avatar: user.avatar,
+      age: user.age,
+      role: user.role,
+      status: user.status,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+  private mapToResponseDtoBcrypt(user: UserEntity) : UserResponseDtoBcrypt {
+     /**
+     * Mapea una entidad de usuario a un DTO de respuesta.
+     * Excluye campos sensibles como la contraseña.
+     * @param {UserEntity} user - Entidad de usuario a mapear
+     * @returns {UserResponseDto} DTO de respuesta con los datos del usuario
+     */
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      password: user.password,
       phone: user.phone,
       online: user.online,
       avatar: user.avatar,
