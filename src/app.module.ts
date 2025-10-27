@@ -6,7 +6,10 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { UserEntity } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
-import { CuposService } from './cupos/services/cupos.service';
+import { CuposModule } from './cupos/cupos.module';
+import { BookingsModule } from './bookings/bookings.module';
+import { CupoEntity } from './cupos/entities/cupo.entity';
+import { BookingEntity } from './bookings/entities/booking.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,7 +27,7 @@ import { CuposService } from './cupos/services/cupos.service';
         const baseConfig = {
           synchronize: configService.get('DB_SYNCHRONIZE') === 'true',
           logging: configService.get('DB_LOGGING') === 'true',
-          entities: [UserEntity],
+          entities: [UserEntity, CupoEntity, BookingEntity],
         };
 
         // Para SQLite solo necesitamos el archivo de base de datos
@@ -50,10 +53,11 @@ import { CuposService } from './cupos/services/cupos.service';
       inject: [ConfigService],
     }),
     UsersModule,
-    AuthModule  
+    AuthModule,
     CuposModule,
+    BookingsModule
     ],
   controllers: [AppController],
-  providers: [AppService, CuposService],
+  providers: [AppService],
 })
 export class AppModule {}
