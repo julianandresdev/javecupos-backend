@@ -10,6 +10,8 @@ import { CuposModule } from './cupos/cupos.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { CupoEntity } from './cupos/entities/cupo.entity';
 import { BookingEntity } from './bookings/entities/booking.entity';
+import { NotificationsModule } from './notifications/notifications.module';
+import { NotificationEntity } from './notifications/entity/notifications.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -27,7 +29,7 @@ import { BookingEntity } from './bookings/entities/booking.entity';
         const baseConfig = {
           synchronize: configService.get('DB_SYNCHRONIZE') === 'true',
           logging: configService.get('DB_LOGGING') === 'true',
-          entities: [UserEntity, CupoEntity, BookingEntity],
+          entities: [UserEntity, CupoEntity, BookingEntity, NotificationEntity],
         };
 
         // Para SQLite solo necesitamos el archivo de base de datos
@@ -55,7 +57,8 @@ import { BookingEntity } from './bookings/entities/booking.entity';
     UsersModule,
     AuthModule,
     CuposModule,
-    BookingsModule
+    BookingsModule,
+    NotificationsModule
     ],
   controllers: [AppController],
   providers: [AppService],
