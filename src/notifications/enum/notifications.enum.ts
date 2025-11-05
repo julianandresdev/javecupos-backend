@@ -28,3 +28,13 @@ export enum NotificationsType {
   ADMIN_MESSAGE = 'Mensaje administrativo',
   POLICY_UPDATE = 'Actualización de políticas',
 }
+
+export enum NotificationStatus {
+  PENDING = 'Pendiente',
+  SENT = 'Enviada',
+  DELIVERED = 'Entregada',
+  READ = 'Leida',
+  ARCHIVED = 'Archivada',
+  DELETED = 'Eliminada',
+  FAILED = 'Error',
+}
