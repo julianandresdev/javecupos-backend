@@ -6,6 +6,8 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { UserEntity } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
+import { RefreshTokenEntity } from './auth/entities/refresh-token.entity';
+import { OTPResetEntity } from './auth/entities/otp-reset.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,7 +25,7 @@ import { AuthModule } from './auth/auth.module';
         const baseConfig = {
           synchronize: configService.get('DB_SYNCHRONIZE') === 'true',
           logging: configService.get('DB_LOGGING') === 'true',
-          entities: [UserEntity],
+          entities: [UserEntity, RefreshTokenEntity, OTPResetEntity],
         };
 
         // Para SQLite solo necesitamos el archivo de base de datos

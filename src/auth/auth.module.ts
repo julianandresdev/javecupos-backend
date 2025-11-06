@@ -21,7 +21,7 @@ import { EmailService } from './services/email.service';
     UsersModule,
     PassportModule, // Necesario para guards y estrategia JWT
     // ✨ NUEVO: Agregar TypeOrmModule para las nuevas entidades
-    TypeOrmModule.forFeature([RefreshTokenEntity, OTPResetEntity]),
+    TypeOrmModule.forFeature([RefreshTokenEntity, OTPResetEntity,]),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'defaultSecret',
       signOptions: { expiresIn: '15m' }, // ⚠️ CAMBIO: Reducido a 15min (recomendado con refresh tokens)

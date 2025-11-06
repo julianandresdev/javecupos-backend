@@ -27,18 +27,14 @@ export class EmailService {
       const htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2>Hola ${userName},</h2>
-          <p>Tu código de verificación es:</p>
-          <div style="text-align: center; padding: 20px; background-color: #f0f0f0; border-radius: 5px; margin: 20px 0;">
-            <h1 style="letter-spacing: 2px; color: #333; margin: 0;">🔐 ${code}</h1>
-          </div>
-          <p>Este código expirará en 30 minutos. Si no solicitaste este código, puedes ignorar este mensaje.</p>
+          <p>Este link expirará en 30 minutos. Si no solicitaste este código, puedes ignorar este mensaje.</p>
           <p style="margin: 20px 0;">
             <a href="${resetLink}" style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
               Resetear Contraseña
             </a>
           </p>
           <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
-          <p style="color: #666; font-size: 12px;">Gracias,<br>El equipo de JavaCupos</p>
+          <p style="color: #666; font-size: 12px;">Gracias,<br>El equipo de JaveCupos</p>
         </div>
       `;
 
