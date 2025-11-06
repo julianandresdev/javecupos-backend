@@ -6,12 +6,14 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { UserEntity } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
-import { CuposModule } from './cupos/cupos.module';
-import { BookingsModule } from './bookings/bookings.module';
+import { RefreshTokenEntity } from './auth/entities/refresh-token.entity';
+import { OTPResetEntity } from './auth/entities/otp-reset.entity';
 import { CupoEntity } from './cupos/entities/cupo.entity';
 import { BookingEntity } from './bookings/entities/booking.entity';
-import { NotificationsModule } from './notifications/notifications.module';
 import { NotificationEntity } from './notifications/entity/notifications.entity';
+import { CuposModule } from './cupos/cupos.module';
+import { BookingsModule } from './bookings/bookings.module';
+import { NotificationsModule } from './notifications/notifications.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -29,7 +31,14 @@ import { NotificationEntity } from './notifications/entity/notifications.entity'
         const baseConfig = {
           synchronize: configService.get('DB_SYNCHRONIZE') === 'true',
           logging: configService.get('DB_LOGGING') === 'true',
-          entities: [UserEntity, CupoEntity, BookingEntity, NotificationEntity],
+          entities: [
+            UserEntity,
+            CupoEntity,
+            BookingEntity,
+            NotificationEntity,
+            RefreshTokenEntity,
+            OTPResetEntity,
+          ],
         };
 
         // Para SQLite solo necesitamos el archivo de base de datos
