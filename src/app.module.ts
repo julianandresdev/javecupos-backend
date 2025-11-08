@@ -7,13 +7,14 @@ import { UsersModule } from './users/users.module';
 import { UserEntity } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { RefreshTokenEntity } from './auth/entities/refresh-token.entity';
-import { OTPResetEntity } from './auth/entities/otp-reset.entity';
+import { TokenResetEntity } from './auth/entities/token-reset.entity';
 import { CupoEntity } from './cupos/entities/cupo.entity';
 import { BookingEntity } from './bookings/entities/booking.entity';
 import { NotificationEntity } from './notifications/entity/notifications.entity';
 import { CuposModule } from './cupos/cupos.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { SeedModule } from './database/seeds/seed.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -37,7 +38,7 @@ import { NotificationsModule } from './notifications/notifications.module';
             BookingEntity,
             NotificationEntity,
             RefreshTokenEntity,
-            OTPResetEntity,
+            TokenResetEntity,
           ],
         };
 
@@ -67,7 +68,8 @@ import { NotificationsModule } from './notifications/notifications.module';
     AuthModule,
     CuposModule,
     BookingsModule,
-    NotificationsModule
+    NotificationsModule,
+    SeedModule
     ],
   controllers: [AppController],
   providers: [AppService],

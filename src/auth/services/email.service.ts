@@ -11,12 +11,11 @@ export class EmailService {
   }
 
   /**
-   * Enviar correo de OTP para reset de contraseña
+   * Enviar correo de token link para reset de contraseña
    */
   async sendPasswordResetEmail(
     email: string,
     userName: string,
-    code: string,
     token: string,
   ): Promise<void> {
     try {
@@ -67,17 +66,17 @@ export class EmailService {
       const htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2>¡Bienvenido ${userName}!</h2>
-          <p>Tu cuenta en JavaCupos ha sido creada exitosamente.</p>
+          <p>Tu cuenta en JaveCupos ha sido creada exitosamente.</p>
           <p>Ahora puedes iniciar sesión y empezar a agendar tus cupos.</p>
           <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
-          <p style="color: #666; font-size: 12px;">El equipo de JavaCupos</p>
+          <p style="color: #666; font-size: 12px;">El equipo de JaveCupos</p>
         </div>
       `;
 
       const response = await this.resend.emails.send({
         from: process.env.MAIL_FROM_ADDRESS || 'onboarding@resend.dev',
         to: email,
-        subject: 'Bienvenido a JavaCupos',
+        subject: 'Bienvenido a JaveCupos',
         html: htmlContent,
       });
 
@@ -86,6 +85,78 @@ export class EmailService {
       }
     } catch (error) {
       console.error('Error en sendWelcomeEmail:', error);
+    }
+  }
+  /**
+   * ✨ NUEVO: Enviar email de verificación de cuenta
+   */
+  async sendVerificationEmail(
+    email: string,
+    name: string,
+    token: string,
+  ): Promise<void> {
+    const verificationLink = `${process.env.FRONTEND_URL}/auth/verify-email?token=${token}`;
+
+    try {
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #007bff; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+            .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px; }
+            .button { 
+              display: inline-block; 
+              background: #007bff; 
+              color: white !important; 
+              padding: 12px 30px; 
+              text-decoration: none; 
+              border-radius: 5px; 
+              margin: 20px 0;
+              font-weight: bold;
+            }
+            .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>¡Bienvenido a JaveCupos!</h1>
+            </div>
+            <div class="content">
+              <p>Hola <strong>${name}</strong>,</p>
+              <p>Gracias por registrarte en JaveCupos. Para activar tu cuenta y comenzar a agendar tus cupos, por favor verifica tu dirección de email.</p>
+              <p style="text-align: center;">
+                <a href="${verificationLink}" class="button">Verificar mi email</a>
+              </p>
+              <p style="color: #666; font-size: 14px;">Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+              <p style="background: #fff; padding: 10px; border: 1px solid #ddd; word-break: break-all; font-size: 12px;">
+                ${verificationLink}
+              </p>
+              <p><strong>⏰ Este enlace expirará en 24 horas.</strong></p>
+              <p>Si no te registraste en JaveCupos, puedes ignorar este mensaje.</p>
+            </div>
+            <div class="footer">
+              <p>Gracias,<br><strong>El equipo de JaveCupos</strong></p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+
+      await this.resend.emails.send({
+        from: process.env.MAIL_FROM_ADDRESS || 'onboarding@resend.dev',
+        to: email,
+        subject: '✅ Verifica tu cuenta en JaveCupos',
+        html: htmlContent,
+      });
+
+      console.log(`✅ Email de verificación enviado a ${email}`);
+    } catch (error) {
+      console.error('❌ Error enviando email de verificación:', error);
+      throw new BadRequestException('Error al enviar email de verificación');
     }
   }
 }

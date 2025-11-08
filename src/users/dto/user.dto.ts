@@ -38,7 +38,7 @@ export class CreateUserDto {
 
   @IsNumber({}, { message: 'El teléfono debe ser un número' })
   @IsNotEmpty({ message: 'El teléfono es obligatorio' })
-  phone: number; // Número de teléfono del usuario
+  phone: string; // Número de teléfono del usuario
 
   @IsOptional()
   @IsString({ message: 'El avatar debe ser una cadena de texto' })
@@ -81,7 +81,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsNumber({}, { message: 'El teléfono debe ser un número' })
-  phone?: number; // Número de teléfono del usuario
+  phone?: string; // Número de teléfono del usuario
 
   @IsOptional()
   @IsBoolean({ message: 'El estado en línea debe ser un valor booleano' })
@@ -115,7 +115,7 @@ export class SearchUserDto {
 
   @IsOptional()
   @IsNumber({}, { message: 'El teléfono debe ser un número' })
-  phone?: number;
+  phone?: string;
 
   @IsOptional()
   @IsEnum(UserRole, { message: 'El rol debe ser un valor válido' })
@@ -130,7 +130,7 @@ export class UserResponseDto {
   id: number; // ID único del usuario
   name: string; // Nombre del usuario
   email: string; // Correo electrónico del usuario
-  phone: number; // Número de teléfono del usuario
+  phone: string; // Número de teléfono del usuario
   online: boolean; // Indica si el usuario está en línea
   avatar?: string; // URL del avatar del usuario (opcional)
   age: number; // Edad del usuario
@@ -145,7 +145,7 @@ export class UserResponseDtoBcrypt {
   name: string; // Nombre del usuario
   email: string; // Correo electrónico del usuario
   password: string;
-  phone: number; // Número de teléfono del usuario
+  phone: string; // Número de teléfono del usuario
   online: boolean; // Indica si el usuario está en línea
   avatar?: string; // URL del avatar del usuario (opcional)
   age: number; // Edad del usuario

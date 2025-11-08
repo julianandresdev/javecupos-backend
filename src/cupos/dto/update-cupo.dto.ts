@@ -7,7 +7,6 @@ import {
   Min,
   IsDate,
   IsString,
-  isEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateCupoDto } from './create-cupo.dto';

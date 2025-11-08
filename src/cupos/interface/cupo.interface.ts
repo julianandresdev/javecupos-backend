@@ -8,7 +8,7 @@ export interface Conductor {
   id: number;
   name: string;
   email: string;
-  phone: number;
+  phone: string;
   role: UserRole;
 }
 

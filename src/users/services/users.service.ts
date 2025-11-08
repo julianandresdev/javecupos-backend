@@ -15,6 +15,7 @@ import {
   UserResponseDto,
   UserResponseDtoBcrypt,
 } from '../dto/user.dto';
+import * as bcrypt from 'bcrypt'
 @Injectable()
 export class UsersService {
   /**
@@ -113,14 +114,14 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<UserResponseDtoBcrypt | null> {
-    console.log("Buscando usuario con email", email)
+    console.log('Buscando usuario con email', email);
 
     const user = await this.userRepository.findOne({
-      where: { email }
-    })
+      where: { email },
+    });
 
-    if(!user) {
-      return null
+    if (!user) {
+      return null;
     }
 
     return this.mapToResponseDtoBcrypt(user);
@@ -135,11 +136,11 @@ export class UsersService {
      * @returns {Promise<UserResponseDto>} El usuario recién creado con ID asignado
      * @throws {ConflictException} Si ya existe un usuario con ese email
      */
-    console.log(`Creating new user in the DB`, createUserDto);
 
     const existingUser = await this.userRepository.findOne({
       where: { email: createUserDto.email },
     });
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
     if (existingUser) {
       throw new ConflictException(
@@ -151,11 +152,11 @@ export class UsersService {
       name: createUserDto.name.trim(),
       email: createUserDto.email.toLowerCase().trim(),
       phone: createUserDto.phone,
-      password: createUserDto.password,
+      password: hashedPassword,
       avatar:
         'https://ui-avatars.com/api/?name=' +
         encodeURIComponent(createUserDto.name),
-      online: false,
+      online: true,
       age: createUserDto.age,
       role: createUserDto.role as UserRole,
       status: UserStatus.PENDING,
@@ -269,8 +270,8 @@ export class UsersService {
       updatedAt: user.updatedAt,
     };
   }
-  private mapToResponseDtoBcrypt(user: UserEntity) : UserResponseDtoBcrypt {
-     /**
+  private mapToResponseDtoBcrypt(user: UserEntity): UserResponseDtoBcrypt {
+    /**
      * Mapea una entidad de usuario a un DTO de respuesta.
      * Excluye campos sensibles como la contraseña.
      * @param {UserEntity} user - Entidad de usuario a mapear

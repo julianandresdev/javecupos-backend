@@ -8,7 +8,7 @@ export class ConductorInfo {
    */
   id: number;
   name: string;
-  phone?: number;
+  phone?: string;
   email?: string;
   role: UserRole;
 }

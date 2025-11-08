@@ -19,6 +19,7 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/users/interfaces/user.interface';
 import { UpdateCupoDto } from '../dto/update-cupo.dto';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
 @Controller('cupos')
 export class CuposController {
@@ -41,13 +42,30 @@ export class CuposController {
   }
 
   @Get()
-  async findAll(@Query() searchCupoDto: SearchCupoDto): Promise<CupoResponseDto[]> {
+  async findAll(
+    @Query() searchCupoDto: SearchCupoDto,
+  ): Promise<CupoResponseDto[]> {
     /**
      * Obtiene una lista de cupos basados en los criterios de búsqueda proporcionados.
      * @param searchDto - Parámetros de búsqueda para filtrar los cupos.
      * @returns Una lista de cupos que coinciden con los criterios de búsqueda.
      */
     return this.cuposService.findAll(searchCupoDto);
+  }
+
+  @Get('my-cupos')
+  @UseGuards(JwtAuthGuard)
+  async findMyCupos(
+    @CurrentUser('id') userId: number,
+  ): Promise<CupoResponseDto[]> {
+    /**
+     * Obtiene los cupos del conductor autenticado
+     * @param userId - ID del usuario extraído del JWT por el decorador @CurrentUser
+     * @returns Lista de cupos del conductor
+     */
+    console.log(`Obteniendo cupos para conductor ID: ${userId}`);
+
+    return this.cuposService.findByDriver(userId);
   }
 
   @Get(':id')
@@ -58,17 +76,6 @@ export class CuposController {
      * @returns El cupo correspondiente al ID proporcionado.
      */
     return this.cuposService.findOne(+id);
-  }
-
-  @Get('my-cupos')
-  @UseGuards(JwtAuthGuard)
-  async findMyCupos(@Request() req): Promise<CupoResponseDto[]> {
-    /**
-     * Obtiene una lista de cupos asociados al conductor autenticado.
-     * @param req - Objeto de la solicitud que contiene la información del conductor autenticado.
-     * @returns Una lista de cupos del conductor autenticado.
-     */
-    return this.cuposService.findByDriver(req.user.id);
   }
 
   @Put(':id/cancel')
@@ -105,7 +112,7 @@ export class CuposController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  async delete(@Param('id') id: string): Promise<{ message: string}> {
+  async delete(@Param('id') id: string): Promise<{ message: string }> {
     /**
      * Elimina un cupo específico.
      * @param id - Identificador único del cupo a eliminar.

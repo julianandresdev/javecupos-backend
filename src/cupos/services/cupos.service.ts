@@ -9,10 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CupoEntity } from '../entities/cupo.entity';
 import {
   FindOptionsWhere,
-  In,
-  Like,
   MoreThanOrEqual,
-  QueryBuilder,
   Repository,
 } from 'typeorm';
 import { CupoResponseDto } from '../dto/cupo-response.dto';
@@ -52,7 +49,7 @@ export class CuposService {
     await this.cupoRepository.save(cupo);
     const cupoConConductor = await this.cupoRepository.findOne({
       where: { id: cupo.id },
-      relations: [UserRole.DRIVER],
+      relations: ['conductor'],
     });
     if (!cupoConConductor) {
       throw new NotFoundException('Cupo no encontrado después de crear');
@@ -118,7 +115,7 @@ export class CuposService {
   async findOne(id: number): Promise<CupoResponseDto> {
     const cupo = await this.cupoRepository.findOne({
       where: { id, activo: true },
-      relations: [UserRole.DRIVER],
+      relations: ['conductor'],
     });
 
     if (!cupo) {
@@ -151,17 +148,29 @@ export class CuposService {
 
   async findByDriver(conductorId: number): Promise<CupoResponseDto[]> {
     /**
-     * Busca todos los cupos de un conductor específico
+     * Busca todos los cupos activos de un conductor específico
      * @param conductorId - ID del conductor
-     * @returns Lista de DTOs de cupos del conductor
+     * @returns Lista de DTOs de cupos del conductor con la relación del conductor cargada
      */
+    console.log(`Buscando cupos para conductor ID: ${conductorId}`);
+
+    // Validar que conductorId sea un número válido
+    if (!conductorId || isNaN(conductorId)) {
+      throw new BadRequestException('ID de conductor inválido');
+    }
+
     const cupos = await this.cupoRepository.find({
       where: { conductorId, activo: true },
-      relations: [UserRole.DRIVER],
+      relations: ['conductor'], // ✅ Nombre de la relación en la entidad
+      order: { createdAt: 'DESC' },
     });
+
+    console.log(
+      `✅ Encontrados ${cupos.length} cupos para el conductor ID: ${conductorId}`,
+    );
+
     return this.mapToResponseDtoArray(cupos);
   }
-
   async cancelCupo(id: number, usuarioId: number): Promise<CupoResponseDto> {
     /**
      * Cancela un cupo si el usuario es el conductor dueño del cupo

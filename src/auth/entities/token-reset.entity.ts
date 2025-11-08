@@ -1,13 +1,10 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
 import { UserEntity } from '../../users/entities/user.entity';
 
-@Entity('otp_resets')
-export class OTPResetEntity {
+@Entity('token_resets')
+export class TokenResetEntity {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column()
-  code: string; // Código OTP de 6 dígitos
 
   @Column()
   userId: number;

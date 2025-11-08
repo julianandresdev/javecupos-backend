@@ -1,4 +1,3 @@
-// src/cupos/entities/cupo.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
