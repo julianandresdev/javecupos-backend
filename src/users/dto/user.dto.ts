@@ -36,7 +36,7 @@ export class CreateUserDto {
   )
   password: string; // Contraseña del usuario
 
-  @IsNumber({}, { message: 'El teléfono debe ser un número' })
+  @IsString({ message: 'El teléfono debe ser un número' })
   @IsNotEmpty({ message: 'El teléfono es obligatorio' })
   phone: string; // Número de teléfono del usuario
 
