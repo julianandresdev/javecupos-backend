@@ -15,10 +15,12 @@ export enum NotificationsType {
   // Eventos de Usuario
   USER_PROFILE_UPDATED = 'Perfil de usuario actualizado',
   ROLE_CHANGED = 'Rol de usuario cambiado',
+  ACCOUNT_VERIFIED = 'Cuenta verificada',
 
   // Eventos de Autenticación
   PASSWORD_CHANGED = 'Contraseña cambiada',
   LOGIN_FAILED = 'Inicio de sesión fallido',
+  LOGIN_SUCCESS = 'Inicio de sesion aprobado',
 
   // Eventos del Sistema
   SYSTEM_MAINTENANCE = 'Mantenimiento del sistema',
