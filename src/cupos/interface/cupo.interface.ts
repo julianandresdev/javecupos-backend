@@ -16,7 +16,7 @@ export interface Cupo {
   /**
    * Identificador único del cupo
    */
-  id: number; 
+  id: number;
   conductorId: number;
   conductor?: Conductor;
   destino: CupoBarrios;

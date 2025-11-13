@@ -42,13 +42,13 @@ export class BookingsController {
 
   @Put(':id/confirm')
   @Roles(UserRole.DRIVER, UserRole.ADMIN)
-  async confirm(@Param('id') id: string) {
-    return this.bookingsService.confirm(+id);
+  async confirm(@Param('id') id: string, @Request() req) {
+    return this.bookingsService.confirm(+id, req.user.id);
   }
 
   @Put(':id/reject')
   @Roles(UserRole.DRIVER, UserRole.ADMIN)
-  async reject(@Param('id') id: string) {
-    return this.bookingsService.reject(+id);
+  async reject(@Param('id') id: string, @Request() req) {
+    return this.bookingsService.reject(+id, req.user.id);
   }
 }

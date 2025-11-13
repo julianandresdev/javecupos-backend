@@ -1,0 +1,31 @@
+:root{--bg:#f3f4f6;--accent:#667eea;--muted:#6b7280}
+*{box-sizing:border-box}
+body{font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(135deg,#eef2ff 0%,#fef3ff 100%);margin:0;padding:20px}
+.app{max-width:1400px;margin:0 auto}
+.app-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.app-header h1{color:var(--accent);margin:0}
+.header-controls input{padding:6px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px}
+.header-controls button{margin-left:8px;padding:6px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer}
+.grid-main{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.full-width{grid-column:1/-1}
+.panel{background:#fff;padding:14px;border-radius:8px;box-shadow:0 6px 18px rgba(12,12,12,0.06)}
+.panel h2{margin:0 0 12px 0;color:var(--accent);font-size:16px}
+.auth-forms{display:flex;gap:12px;flex-wrap:wrap}
+.form-block{flex:1;min-width:200px}
+.form-block input, textarea, select{width:100%;padding:8px;margin-top:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px}
+.form-block button{margin-top:8px;padding:8px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer}
+.form-block button:hover{background:#5568d3}
+.session-area{margin-top:12px}
+.hidden{display:none}
+.token-box textarea{height:70px}
+.form-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.form-row input{flex:1}
+.form-row select{padding:8px;border:1px solid #e5e7eb;border-radius:6px}
+.form-row button{padding:8px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer}
+.result pre{background:#0f1724;color:#e6eef8;padding:10px;border-radius:6px;max-height:300px;overflow:auto;margin:0}
+.ws-controls button{margin-right:8px;margin-bottom:8px;padding:8px 10px;border-radius:6px;border:none;background:#10b981;color:#fff;cursor:pointer}
+.ws-controls button:disabled{background:#ccc;cursor:not-allowed}
+.ws-log .log{background:#111827;color:#fff;padding:8px;border-radius:6px;max-height:300px;overflow:auto;font-size:12px}
+.footer{text-align:center;margin-top:12px;color:var(--muted);font-size:12px}
+
+@media(max-width:768px){.grid-main{grid-template-columns:1fr}.full-width{grid-column:1}.auth-forms{flex-direction:column}}

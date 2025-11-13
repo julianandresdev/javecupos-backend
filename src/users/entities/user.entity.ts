@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { UserRole, UserStatus } from '../interfaces/user.interface';
 
 @Entity('users')
@@ -48,6 +55,12 @@ export class UserEntity {
   })
   status: UserStatus; // Estado actual del usuario
 
+  @Column({
+    type: 'int',
+    default: 5,
+  })
+  rate: number; // Calificacion del usuario.
+
   @CreateDateColumn({ type: 'varchar', length: 100 })
   createdAt: Date; // Fecha de creación del usuario (se establece automáticamente)
 
@@ -65,6 +78,7 @@ export class UserEntity {
     this.online = this.online ?? false;
     this.role = this.role ?? UserRole.USER;
     this.status = this.status ?? UserStatus.PENDING;
+    this.rate = 5;
     this.createdAt = this.createdAt ?? new Date();
     this.updatedAt = this.updatedAt ?? new Date();
   }

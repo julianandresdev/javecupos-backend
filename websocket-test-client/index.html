@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>JaveCupos · Test Client (Modular)</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <h1>JaveCupos — Test Client</h1>
+        <div class="header-controls">
+          <label>Backend URL:
+            <input id="backend-url" value="http://localhost:3000" />
+          </label>
+          <button id="save-backend">Guardar</button>
+        </div>
+      </header>
+
+      <main class="grid-main">
+        <!-- Auth Panel -->
+        <section class="panel" id="auth-panel">
+          <h2>🔐 Autenticación</h2>
+          <div class="auth-forms">
+            <div class="form-block">
+              <h3>Login</h3>
+              <input id="login-email" placeholder="email@example.com" />
+              <input id="login-password" type="password" placeholder="contraseña" />
+              <button id="btn-login">Iniciar sesión</button>
+            </div>
+
+            <div class="form-block">
+              <h3>Registro</h3>
+              <input id="reg-name" placeholder="Nombre" />
+              <input id="reg-email" placeholder="email@example.com" />
+              <input id="reg-password" type="password" placeholder="contraseña" />
+              <button id="btn-register">Registrar</button>
+            </div>
+          </div>
+
+          <div class="session-area">
+            <div id="user-info" class="hidden">
+              <strong id="user-name">-</strong>
+              <div id="user-role">-</div>
+              <div class="token-box">
+                <label>JWT:</label>
+                <textarea id="token-storage" readonly></textarea>
+              </div>
+              <button id="btn-logout">Cerrar sesión</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Auth Extra Panel -->
+        <section class="panel" id="auth-extra">
+          <h2>📧 Gestión de Cuenta</h2>
+          <div class="auth-forms">
+            <div class="form-block">
+              <h3>Verificar Email</h3>
+              <input id="verify-token" placeholder="Token de verificación" />
+              <button id="btn-verify-email">Verificar</button>
+            </div>
+
+            <div class="form-block">
+              <h3>Reenviar Verificación</h3>
+              <input id="resend-email" placeholder="email@example.com" />
+              <button id="btn-resend-verification">Reenviar</button>
+            </div>
+
+            <div class="form-block">
+              <h3>Recuperar Contraseña</h3>
+              <input id="forgot-email" placeholder="email@example.com" />
+              <button id="btn-forgot-password">Enviar</button>
+            </div>
+
+            <div class="form-block">
+              <h3>Restablecer Contraseña</h3>
+              <input id="reset-token" placeholder="Token de recuperación" />
+              <input id="reset-password" type="password" placeholder="Nueva contraseña" />
+              <button id="btn-reset-password">Restablecer</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Cupos Panel -->
+        <section class="panel" id="cupos-panel">
+          <h2>🚗 Cupos (Viajes)</h2>
+          <div class="form-block">
+            <h3>Crear Cupo</h3>
+            <input id="cupo-destino" placeholder="Destino/Barrio" />
+            <input id="cupo-punto" placeholder="Punto de encuentro" />
+            <input id="cupo-asientos" type="number" value="4" min="1" max="8" />
+            <input id="cupo-hora" type="datetime-local" />
+            <input id="cupo-precio" type="number" placeholder="Precio" min="0" />
+            <button id="btn-create-cupo">Crear</button>
+          </div>
+          <div style="margin-top:12px">
+            <button id="btn-list-cupos">📋 Listar Cupos</button>
+            <button id="btn-my-cupos">🚗 Mis Cupos</button>
+          </div>
+        </section>
+
+        <!-- Bookings Panel -->
+        <section class="panel" id="bookings-panel">
+          <h2>📅 Reservas</h2>
+          <div class="form-block">
+            <h3>Crear Reserva</h3>
+            <input id="booking-cupo-id" type="number" placeholder="ID del Cupo" />
+            <input id="booking-asientos" type="number" value="1" min="1" max="8" />
+            <button id="btn-create-booking">Reservar</button>
+          </div>
+          <div style="margin-top:12px">
+            <button id="btn-my-bookings">📋 Mis Reservas</button>
+            <button id="btn-all-bookings">👤 Todas</button>
+          </div>
+        </section>
+
+        <!-- Notifications Panel -->
+        <section class="panel" id="notifs-panel">
+          <h2>🔔 Notificaciones</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="btn-my-notifications">Mi Bandeja</button>
+            <button id="btn-pending-notifs">Pendientes</button>
+            <button id="btn-unread-count">Sin Leer</button>
+          </div>
+        </section>
+
+        <!-- Users Panel -->
+        <section class="panel" id="users-panel">
+          <h2>👥 Usuarios</h2>
+          <button id="btn-all-users">Listar Todos</button>
+        </section>
+
+        <!-- API Tester -->
+        <section class="panel full-width" id="api-tester">
+          <h2>🧪 Tester Genérico</h2>
+          <div class="form-row">
+            <select id="req-method"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select>
+            <input id="req-path" placeholder="/auth/profile" />
+            <button id="btn-send">Enviar</button>
+          </div>
+          <textarea id="req-body" placeholder='JSON body para POST/PUT/PATCH'></textarea>
+          <div class="result">
+            <h4>Respuesta</h4>
+            <pre id="response"></pre>
+          </div>
+        </section>
+
+        <!-- WebSocket Panel -->
+        <section class="panel full-width" id="ws-panel">
+          <h2>⚡ WebSocket / Notifications</h2>
+          <div class="ws-controls">
+            <button id="ws-connect">Conectar WS</button>
+            <button id="ws-disconnect" disabled>Desconectar</button>
+            <button id="ws-request-notifs">Pedir notificaciones</button>
+            <button id="ws-mark-all">Marcar todas leídas</button>
+          </div>
+          <div class="ws-log">
+            <h4>Eventos</h4>
+            <div id="ws-log-area" class="log"></div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <small>Cliente de pruebas modular — JWT persistente, refresh token, todos los endpoints</small>
+      </footer>
+    </div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

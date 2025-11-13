@@ -15,7 +15,7 @@ import {
   UserResponseDto,
   UserResponseDtoBcrypt,
 } from '../dto/user.dto';
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
   /**
@@ -207,6 +207,7 @@ export class UsersService {
     if (updateUserDto.age) user.age = updateUserDto.age;
     if (updateUserDto.role) user.role = updateUserDto.role as UserRole;
     if (updateUserDto.status) user.status = updateUserDto.status as UserStatus;
+    if (updateUserDto.rate) user.rate = updateUserDto.rate;
 
     const updateUser = await this.userRepository.save(user);
     console.log(`User with id ${id} updated successfully`, updateUser);
@@ -266,6 +267,7 @@ export class UsersService {
       age: user.age,
       role: user.role,
       status: user.status,
+      rate: user.rate,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -288,6 +290,7 @@ export class UsersService {
       age: user.age,
       role: user.role,
       status: user.status,
+      rate: user.rate,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

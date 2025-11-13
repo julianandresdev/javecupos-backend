@@ -144,7 +144,7 @@ export class EmailService {
           </div>
         </body>
         </html>
-      `
+      `;
 
       await this.resend.emails.send({
         from: process.env.MAIL_FROM_ADDRESS || 'onboarding@resend.dev',

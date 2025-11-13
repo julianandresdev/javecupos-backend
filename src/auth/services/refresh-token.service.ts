@@ -22,7 +22,7 @@ export class RefreshTokenService {
   ): Promise<string> {
     // Generar token único
     const token = crypto.randomBytes(32).toString('hex');
-    
+
     // Hash del token para almacenamiento seguro
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 

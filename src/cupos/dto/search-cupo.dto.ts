@@ -11,7 +11,6 @@ import { CupoStatus } from '../enum/cupo-status.enum';
 import { CupoBarrios } from '../enum/cupo-barrios.enum';
 
 export class SearchCupoDto {
-
   @IsOptional()
   @IsString()
   @IsEnum(CupoBarrios)
@@ -57,4 +56,3 @@ export class SearchCupoDto {
   @Type(() => Number)
   limit?: number;
 }
-

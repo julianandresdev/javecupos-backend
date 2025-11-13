@@ -2,28 +2,28 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateCupoDto } from '../dto/create-cupo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CupoEntity } from '../entities/cupo.entity';
-import {
-  FindOptionsWhere,
-  MoreThanOrEqual,
-  Repository,
-} from 'typeorm';
+import { FindOptionsWhere, MoreThanOrEqual, Repository } from 'typeorm';
 import { CupoResponseDto } from '../dto/cupo-response.dto';
 import { SearchCupoDto } from '../dto/search-cupo.dto';
-import { UserRole } from 'src/users/interfaces/user.interface';
 import { UpdateCupoDto } from '../dto/update-cupo.dto';
 import { CupoStatus } from '../enum/cupo-status.enum';
 import { CupoBarrios } from '../enum/cupo-barrios.enum';
+import { NotificationsService } from 'src/notifications/services/notifications.service';
+import { NotificationsType } from 'src/notifications/enum/notifications.enum';
 
 @Injectable()
 export class CuposService {
+  private readonly logger = new Logger(CuposService.name);
   constructor(
     @InjectRepository(CupoEntity)
     private cupoRepository: Repository<CupoEntity>,
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(
@@ -54,6 +54,13 @@ export class CuposService {
     if (!cupoConConductor) {
       throw new NotFoundException('Cupo no encontrado después de crear');
     }
+
+    await this.notificationsService.createNotification(
+      conductorId,
+      NotificationsType.CUPO_CREATED,
+      `Tu cupo con destino ${cupo.destino} ha sido creado exitosamente.`,
+    );
+
     return this.mapToResponseDto(cupoConConductor);
   }
 
@@ -141,8 +148,23 @@ export class CuposService {
     if (!cupo) {
       throw new NotFoundException('Cupo no encontrado');
     }
+    // Antes de aplicar los cambios, detecta las diferencias
+    const changes = this.detectModifiedFieldsDetailed(cupo, updateCupoDto);
+
+    // Aplica los cambios y guarda el cupo actualizado
     Object.assign(cupo, updateCupoDto);
     const updatedCupo = await this.cupoRepository.save(cupo);
+
+    // Solo notifica si realmente hubo cambios relevantes
+    if (changes.length > 0) {
+      const message = this.buildSmartModificationMessage(changes, id);
+      await this.notificationsService.createNotification(
+        cupo.conductorId,
+        NotificationsType.CUPO_MODIFIED,
+        message,
+      );
+    }
+
     return this.mapToResponseDto(updatedCupo);
   }
 
@@ -199,6 +221,12 @@ export class CuposService {
     cupo.activo = false;
 
     await this.cupoRepository.save(cupo);
+    await this.notificationsService.createNotification(
+      usuarioId,
+      NotificationsType.CUPO_MODIFIED,
+      'El cupo fue cancelado.',
+    );
+
     return this.mapToResponseDto(cupo);
   }
 
@@ -213,10 +241,17 @@ export class CuposService {
       throw new NotFoundException(`Cupo con id ${id} no encontrado`);
     }
 
-    this.cupoRepository.delete(id);
+    if (process.env.NODE_ENV == 'development') {
+      this.cupoRepository.delete(id);
+    }
+    if (process.env.NODE_ENV == 'production') {
+      cupo.activo = false;
+    }
+
     /**
      * Recomendacion para produccion: mejor usar eliminación lógica
      * estableciendo cupo.activo = false y guardando el cambio (soft delete)
+     * ✅ hecho
      */
     return { message: `Cupo con id ${id} eliminado correctamente` };
   }
@@ -277,10 +312,106 @@ export class CuposService {
       tiempoParaSalida,
     };
   }
-  /**
-   * Convierte múltiples entidades a DTOs de respuesta
-   */
+
   private mapToResponseDtoArray(cupos: CupoEntity[]): CupoResponseDto[] {
+    /**
+     * Convierte múltiples entidades a DTOs de respuesta
+     */
     return cupos.map((cupo) => this.mapToResponseDto(cupo));
+  }
+
+  private detectModifiedFieldsDetailed(
+    currentCupo: CupoEntity,
+    updateDto: UpdateCupoDto,
+  ): Array<{
+    field: string;
+    oldValue: any;
+    newValue: any;
+    readableName: string;
+  }> {
+    /**
+     * Detecta cambios entre el Cupo original y el DTO a actualizar.
+     * Devuelve lista de objetos { field, oldValue, newValue, readableName }
+     */
+    const fieldNames: Record<string, string> = {
+      origen: 'origen',
+      puntoEncuentro: 'lugar de encuentro',
+      descripcion: 'descripcion',
+      destino: 'destino',
+      horaSalida: 'hora de salida',
+      asientosDisponibles: 'cupos disponibles',
+      precio: 'precio',
+    };
+    const changes: Array<{
+      field: string;
+      oldValue: any;
+      newValue: any;
+      readableName: string;
+    }> = [];
+    Object.keys(updateDto).forEach((key) => {
+      const newValue = updateDto[key];
+      const currentValue = currentCupo[key];
+      if (
+        newValue !== undefined &&
+        newValue !== null &&
+        newValue !== currentValue
+      ) {
+        changes.push({
+          field: key,
+          oldValue: currentValue,
+          newValue,
+          readableName: fieldNames[key] || key,
+        });
+      }
+    });
+    return changes;
+  }
+
+  private buildSmartModificationMessage(
+    changes: Array<{
+      field: string;
+      oldValue: any;
+      newValue: any;
+      readableName: string;
+    }>,
+    cupoId: number,
+  ): string {
+    /**
+     * Devuelve un mensaje combinando campos con valor y campos solo con nombre.
+     */
+    // Campos donde SI se muestra el valor nuevo:
+    const fieldsToShowValue = [
+      'precio',
+      'cupos disponibles',
+      'fecha de salida',
+      'hora de salida',
+    ];
+
+    // Recolectar texto
+    const detailedChanges: string[] = [];
+    const simpleChanges: string[] = [];
+
+    changes.forEach((change) => {
+      if (fieldsToShowValue.includes(change.readableName)) {
+        // Mostrar el campo y el nuevo valor amigable (puedes formatear fechas, etc. si lo deseas)
+        detailedChanges.push(`"${change.readableName}" → "${change.newValue}"`);
+      } else {
+        // Solo nombre del campo
+        simpleChanges.push(`"${change.readableName}"`);
+      }
+    });
+
+    // Armar mensaje combinando ambos tipos de info:
+    const parts: string[] = [];
+    if (detailedChanges.length > 0) parts.push(detailedChanges.join(', '));
+    if (simpleChanges.length > 0) {
+      if (simpleChanges.length === 1) {
+        parts.push(`se actualizó ${simpleChanges[0]}`);
+      } else {
+        parts.push(`se actualizaron ${simpleChanges.join(', ')}`);
+      }
+    }
+
+    return `Tu cupo #${cupoId} fue modificado: ${parts.join(' y ')}.`;
   }
 }

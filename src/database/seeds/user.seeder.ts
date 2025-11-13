@@ -40,10 +40,10 @@ export class UserSeeder {
         name: 'Usuario Regular 2',
         email: 'user2@test.com',
         password: hashedPassword,
-        role: UserRole.DRIVER,
+        role: UserRole.USER,
         status: UserStatus.ACTIVE,
         phone: '+57 300 2222222',
-        age: 17
+        age: 17,
       },
       {
         name: 'Usuario Pendiente',
@@ -52,7 +52,7 @@ export class UserSeeder {
         role: UserRole.USER,
         status: UserStatus.PENDING,
         phone: '+57 300 3333333',
-        age: 19
+        age: 19,
       },
     ];
 

@@ -18,13 +18,13 @@ export class BookingEntity {
   @Column()
   userId: number;
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, { eager: false })
   user: UserEntity;
 
   @Column()
   cupoId: number;
 
-  @ManyToOne(() => CupoEntity)
+  @ManyToOne(() => CupoEntity, { eager: false })
   cupo: CupoEntity;
 
   @Column({ default: 1 })

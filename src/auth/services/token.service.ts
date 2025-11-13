@@ -24,7 +24,7 @@ export class OTPService {
   async createToken(
     userId: number,
     expiresInMinutes: number = 30,
-  ): Promise<{token: string }> {
+  ): Promise<{ token: string }> {
     // Invalidar OTPs anteriores no usados
     await this.tokenRepository.delete({
       userId,

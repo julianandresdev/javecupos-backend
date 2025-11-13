@@ -25,7 +25,9 @@ import { TokenResetEntity } from './entities/token-reset.entity';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: '15m' as any, // Cast para evitar error de tipo
+          expiresIn:
+            configService.get<string>('JWT_ACCESS_EXPIRATION') ||
+            ('15m' as any), // Cast para evitar error de tipo
         },
       }),
       inject: [ConfigService],

@@ -102,6 +102,10 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEnum(UserStatus, { message: 'El estado debe ser un valor válido' })
   status?: string; // Estado actual del usuario
+
+  @IsOptional()
+  @IsNumber({}, { message: 'La calificacion debe ser un numero' })
+  rate?: number;
 }
 
 export class SearchUserDto {
@@ -136,6 +140,7 @@ export class UserResponseDto {
   age: number; // Edad del usuario
   role: string; // Rol del usuario (por ejemplo, 'admin', 'user', etc.)
   status: string; // Estado actual del usuario
+  rate: number; // Calificacion del usuario (0-5)
   createdAt: Date; // Fecha de creación del usuario
   updatedAt: Date; // Fecha de la última actualización del usuario
 }
@@ -144,13 +149,14 @@ export class UserResponseDtoBcrypt {
   id: number; // ID único del usuario
   name: string; // Nombre del usuario
   email: string; // Correo electrónico del usuario
-  password: string;
+  password: string; // Contraseña del usuario (encriptada)
   phone: string; // Número de teléfono del usuario
   online: boolean; // Indica si el usuario está en línea
   avatar?: string; // URL del avatar del usuario (opcional)
   age: number; // Edad del usuario
   role: string; // Rol del usuario (por ejemplo, 'admin', 'user', etc.)
   status: string; // Estado actual del usuario
+  rate: number; // Calificacion del usuario (0-5)
   createdAt: Date; // Fecha de creación del usuario
   updatedAt: Date; // Fecha de la última actualización del usuario
 }

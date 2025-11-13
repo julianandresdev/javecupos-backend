@@ -15,14 +15,16 @@ import { CuposModule } from './cupos/cupos.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SeedModule } from './database/seeds/seed.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
-  
-  
+
+    EventEmitterModule.forRoot(),
+
     // 🗄️ Configuración escalable de TypeORM (lee todo del .env)
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -46,7 +48,8 @@ import { SeedModule } from './database/seeds/seed.module';
         if (dbType === 'sqlite') {
           return {
             type: 'sqlite',
-            database: configService.get<string>('DB_DATABASE') || './javecupos.db',
+            database:
+              configService.get<string>('DB_DATABASE') || './javecupos.db',
             ...baseConfig,
           };
         } else {
@@ -69,8 +72,8 @@ import { SeedModule } from './database/seeds/seed.module';
     CuposModule,
     BookingsModule,
     NotificationsModule,
-    SeedModule
-    ],
+    SeedModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

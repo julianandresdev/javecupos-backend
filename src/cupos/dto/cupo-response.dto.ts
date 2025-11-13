@@ -1,6 +1,6 @@
-import { UserRole } from "src/users/interfaces/user.interface";
-import { CupoStatus } from "../enum/cupo-status.enum";
-import { CupoBarrios } from "../enum/cupo-barrios.enum";
+import { UserRole } from 'src/users/interfaces/user.interface';
+import { CupoStatus } from '../enum/cupo-status.enum';
+import { CupoBarrios } from '../enum/cupo-barrios.enum';
 
 export class ConductorInfo {
   /**

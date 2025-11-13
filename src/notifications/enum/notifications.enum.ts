@@ -11,6 +11,7 @@ export enum NotificationsType {
   CUPO_MODIFIED = 'Cupo modificado',
   CUPO_UNAVAILABLE = 'Cupo no disponible',
   CUPO_AVAILABLE = 'Cupo disponible',
+  CUPO_CANCELLED = 'Cupo cancelado',
 
   // Eventos de Usuario
   USER_PROFILE_UPDATED = 'Perfil de usuario actualizado',
