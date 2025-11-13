@@ -3,6 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import * as crypto from 'crypto';
+import {
+  getBogotaDate,
+  getBogotaDatePlusMilliseconds,
+} from '../../common/utils/date-time.util';
 
 @Injectable()
 export class RefreshTokenService {
@@ -26,7 +30,7 @@ export class RefreshTokenService {
     // Hash del token para almacenamiento seguro
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-    const expiresAt = new Date(Date.now() + expiresIn);
+    const expiresAt = getBogotaDatePlusMilliseconds(expiresIn);
 
     await this.refreshTokenRepository.save({
       token: hashedToken,
@@ -58,7 +62,7 @@ export class RefreshTokenService {
     }
 
     // Verificar que no haya expirado
-    if (refreshToken.expiresAt < new Date()) {
+    if (refreshToken.expiresAt < getBogotaDate()) {
       await this.refreshTokenRepository.remove(refreshToken);
       return false;
     }
@@ -92,7 +96,7 @@ export class RefreshTokenService {
    */
   async cleanExpiredTokens(): Promise<void> {
     await this.refreshTokenRepository.delete({
-      expiresAt: new Date(),
+      expiresAt: getBogotaDate(),
     });
   }
 }

@@ -3,6 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TokenResetEntity } from '../entities/token-reset.entity';
 import * as crypto from 'crypto';
+import {
+  getBogotaDate,
+  getBogotaDatePlusMinutes,
+} from '../../common/utils/date-time.util';
 
 @Injectable()
 export class OTPService {
@@ -32,7 +36,7 @@ export class OTPService {
     });
 
     const token = this.generateToken();
-    const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000);
+    const expiresAt = getBogotaDatePlusMinutes(expiresInMinutes);
 
     await this.tokenRepository.save({
       token,
@@ -61,7 +65,7 @@ export class OTPService {
     }
 
     // Verificar expiración
-    if (tokenValidation.expiresAt < new Date()) {
+    if (tokenValidation.expiresAt < getBogotaDate()) {
       throw new BadRequestException('El token ha expirado');
     }
 
@@ -89,7 +93,7 @@ export class OTPService {
    */
   async cleanExpiredTokens(): Promise<void> {
     await this.tokenRepository.delete({
-      expiresAt: new Date(),
+      expiresAt: getBogotaDate(),
     });
   }
 }

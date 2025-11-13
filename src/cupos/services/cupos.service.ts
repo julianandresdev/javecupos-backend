@@ -16,6 +16,7 @@ import { CupoStatus } from '../enum/cupo-status.enum';
 import { CupoBarrios } from '../enum/cupo-barrios.enum';
 import { NotificationsService } from 'src/notifications/services/notifications.service';
 import { NotificationsType } from 'src/notifications/enum/notifications.enum';
+import { getBogotaDate } from '../../common/utils/date-time.util';
 
 @Injectable()
 export class CuposService {
@@ -37,7 +38,7 @@ export class CuposService {
      * @returns DTO del cupo creado
      */
     // Validar hora futura
-    if (createCupoDto.horaSalida <= new Date()) {
+    if (createCupoDto.horaSalida <= getBogotaDate()) {
       throw new BadRequestException('La hora de salida debe ser futura');
     }
 
@@ -262,7 +263,7 @@ export class CuposService {
      * @param cupo - Entidad Cupo
      * @returns DTO de respuesta del cupo
      */
-    const now = new Date();
+    const now = getBogotaDate();
     const horaSalida = new Date(cupo.horaSalida);
 
     // Calcular tiempo para la salida

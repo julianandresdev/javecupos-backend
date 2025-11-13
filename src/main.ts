@@ -4,6 +4,9 @@ import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
+  // ⏰ Configurar zona horaria global para America/Bogota (GMT-5)
+  process.env.TZ = 'America/Bogota';
+
   const app = await NestFactory.create(AppModule);
 
   // cookieparser middleware

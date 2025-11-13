@@ -7,6 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { UserRole, UserStatus } from '../interfaces/user.interface';
+import { getBogotaDate } from '../../common/utils/date-time.util';
 
 @Entity('users')
 export class UserEntity {
@@ -79,18 +80,18 @@ export class UserEntity {
     this.role = this.role ?? UserRole.USER;
     this.status = this.status ?? UserStatus.PENDING;
     this.rate = 5;
-    this.createdAt = this.createdAt ?? new Date();
-    this.updatedAt = this.updatedAt ?? new Date();
+    this.createdAt = this.createdAt ?? getBogotaDate();
+    this.updatedAt = this.updatedAt ?? getBogotaDate();
   }
 
   updateTimestamp(): void {
-    this.updatedAt = new Date();
-    // Actualiza la fecha de la última actualización a la fecha y hora actual
+    this.updatedAt = getBogotaDate();
+    // Actualiza la fecha de la última actualización a la fecha y hora actual en zona horaria de Bogotá
   }
 
   actualDate(): Date {
-    return new Date();
-    // Retorna la fecha y hora actual
+    return getBogotaDate();
+    // Retorna la fecha y hora actual en zona horaria de Bogotá
   }
 
   getDisplayName(): string {

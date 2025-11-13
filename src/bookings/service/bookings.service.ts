@@ -15,6 +15,7 @@ import { BookingStatus } from '../enums/booking-status.enum';
 import { CupoStatus } from 'src/cupos/enum/cupo-status.enum';
 import { NotificationsService } from 'src/notifications/services/notifications.service';
 import { NotificationsType } from 'src/notifications/enum/notifications.enum';
+import { getBogotaDate } from '../../common/utils/date-time.util';
 
 @Injectable()
 export class BookingsService {
@@ -29,7 +30,7 @@ export class BookingsService {
   async create(createBookingDto: CreateBookingDto, userId: number) {
     const searchCupo = await this.cuposService.findOne(createBookingDto.cupoId);
 
-    if (searchCupo.horaSalida < new Date()) {
+    if (searchCupo.horaSalida < getBogotaDate()) {
       throw new BadRequestException(
         'No se pueden reservar cupos en fechas pasadas',
       );
