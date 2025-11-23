@@ -7,6 +7,7 @@ import {
   UseGuards,
   Request,
   Put,
+  Query,
 } from '@nestjs/common';
 import { BookingsService } from '../service/bookings.service';
 import { CreateBookingDto } from '../dto/create-booking.dto';
@@ -36,7 +37,17 @@ export class BookingsController {
 
   @Get()
   @Roles(UserRole.ADMIN, UserRole.DRIVER)
-  async findAll() {
+  async findAll(@Query('cupoId') cupoId?: string, @Request() req?) {
+    /**
+     * Obtiene todas las reservas activas o las reservas de un cupo específico
+     * @param cupoId - ID del cupo (opcional)
+     * @param req - Objeto de solicitud con información del usuario autenticado
+     * @returns Lista de reservas
+     */
+    if (cupoId) {
+      const conductorId = req?.user?.id;
+      return this.bookingsService.findByCupoId(+cupoId, conductorId);
+    }
     return this.bookingsService.findAll();
   }
 

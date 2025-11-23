@@ -16,7 +16,7 @@ import { CupoStatus } from '../enum/cupo-status.enum';
 import { CupoBarrios } from '../enum/cupo-barrios.enum';
 import { NotificationsService } from 'src/notifications/services/notifications.service';
 import { NotificationsType } from 'src/notifications/enum/notifications.enum';
-import { getBogotaDate } from '../../common/utils/date-time.util';
+import { getBogotaDate, formatBogotaDate } from '../../common/utils/date-time.util';
 
 @Injectable()
 export class CuposService {
@@ -136,19 +136,61 @@ export class CuposService {
   async update(
     id: number,
     updateCupoDto: UpdateCupoDto,
+    conductorId?: number,
   ): Promise<CupoResponseDto> {
     /**
      * Actualiza un cupo existente
      * @param id - ID del cupo a actualizar
      * @param updateCupoDto - Datos para actualizar el cupo
+     * @param conductorId - ID del conductor que intenta actualizar (opcional, para validación de permisos)
      * @returns DTO del cupo actualizado
      */
     const cupo = await this.cupoRepository.findOne({
       where: { id, activo: true },
     });
     if (!cupo) {
-      throw new NotFoundException('Cupo no encontrado');
+      throw new NotFoundException(`Cupo con ID ${id} no encontrado o no está activo`);
     }
+
+    // Validar permisos: solo el conductor dueño puede actualizar
+    if (conductorId !== undefined && cupo.conductorId !== conductorId) {
+      throw new ForbiddenException(
+        'No tienes permisos para actualizar este cupo. Solo el conductor dueño puede modificarlo.',
+      );
+    }
+
+    // Validar que asientosDisponibles no exceda asientosTotales
+    if (
+      updateCupoDto.asientosDisponibles !== undefined &&
+      updateCupoDto.asientosTotales !== undefined
+    ) {
+      if (updateCupoDto.asientosDisponibles > updateCupoDto.asientosTotales) {
+        throw new BadRequestException(
+          `Los asientos disponibles (${updateCupoDto.asientosDisponibles}) no pueden exceder los asientos totales (${updateCupoDto.asientosTotales})`,
+        );
+      }
+    } else if (updateCupoDto.asientosDisponibles !== undefined) {
+      // Si solo se actualiza asientosDisponibles, validar contra el valor actual de asientosTotales
+      if (updateCupoDto.asientosDisponibles > cupo.asientosTotales) {
+        throw new BadRequestException(
+          `Los asientos disponibles (${updateCupoDto.asientosDisponibles}) no pueden exceder los asientos totales (${cupo.asientosTotales})`,
+        );
+      }
+    }
+
+    // Validar que horaSalida siga siendo futura si se actualiza
+    if (updateCupoDto.horaSalida !== undefined) {
+      const nuevaHoraSalida =
+        updateCupoDto.horaSalida instanceof Date
+          ? updateCupoDto.horaSalida
+          : new Date(updateCupoDto.horaSalida);
+      if (nuevaHoraSalida <= getBogotaDate()) {
+        throw new BadRequestException(
+          'La hora de salida debe ser futura. No se puede actualizar a una fecha pasada.',
+        );
+      }
+    }
+
     // Antes de aplicar los cambios, detecta las diferencias
     const changes = this.detectModifiedFieldsDetailed(cupo, updateCupoDto);
 
@@ -175,8 +217,6 @@ export class CuposService {
      * @param conductorId - ID del conductor
      * @returns Lista de DTOs de cupos del conductor con la relación del conductor cargada
      */
-    console.log(`Buscando cupos para conductor ID: ${conductorId}`);
-
     // Validar que conductorId sea un número válido
     if (!conductorId || isNaN(conductorId)) {
       throw new BadRequestException('ID de conductor inválido');
@@ -187,10 +227,6 @@ export class CuposService {
       relations: ['conductor'], // ✅ Nombre de la relación en la entidad
       order: { createdAt: 'DESC' },
     });
-
-    console.log(
-      `✅ Encontrados ${cupos.length} cupos para el conductor ID: ${conductorId}`,
-    );
 
     return this.mapToResponseDtoArray(cupos);
   }
@@ -256,17 +292,39 @@ export class CuposService {
      */
     return { message: `Cupo con id ${id} eliminado correctamente` };
   }
-
+  /**
+   * Convierte una entidad Cupo a un DTO de respuesta
+   * @param cupo - Entidad Cupo
+   * @returns DTO de respuesta del cupo
+   */
   private mapToResponseDto(cupo: CupoEntity): CupoResponseDto {
-    /**
-     * Convierte una entidad Cupo a un DTO de respuesta
-     * @param cupo - Entidad Cupo
-     * @returns DTO de respuesta del cupo
-     */
     const now = getBogotaDate();
-    const horaSalida = new Date(cupo.horaSalida);
+    
+    // Manejar horaSalida que puede venir como string o Date (por el campo varchar en BD)
+    // TypeORM guarda Date como ISO string en UTC cuando el campo es varchar
+    let horaSalida: Date;
+    if (cupo.horaSalida instanceof Date) {
+      // Si ya es Date, usarlo directamente
+      horaSalida = cupo.horaSalida;
+    } else if (typeof cupo.horaSalida === 'string') {
+      // Si es string (viene de BD como varchar), parsearlo
+      // El string puede venir en formato ISO (UTC) o en otro formato
+      // new Date() interpreta ISO strings correctamente
+      const parsed = new Date(cupo.horaSalida);
+      // Validar que la fecha sea válida
+      if (isNaN(parsed.getTime())) {
+        this.logger.warn(`Fecha inválida en horaSalida para cupo ${cupo.id}: ${cupo.horaSalida}`);
+        horaSalida = now;
+      } else {
+        horaSalida = parsed;
+      }
+    } else {
+      // Fallback: usar fecha actual
+      this.logger.warn(`horaSalida no es Date ni string para cupo ${cupo.id}`);
+      horaSalida = now;
+    }
 
-    // Calcular tiempo para la salida
+    // Calcular tiempo para la salida (ambas fechas en la misma referencia temporal)
     const tiempoParaSalidaMs = horaSalida.getTime() - now.getTime();
     let tiempoParaSalida: string | undefined;
 
@@ -302,7 +360,7 @@ export class CuposService {
       descripcion: cupo.descripcion,
       asientosTotales: cupo.asientosTotales,
       asientosDisponibles: cupo.asientosDisponibles,
-      horaSalida: cupo.horaSalida,
+      horaSalida: horaSalida, // Retornar la fecha parseada correctamente
       precio: cupo.precio,
       estado: cupo.estado,
       activo: cupo.activo,

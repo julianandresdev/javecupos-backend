@@ -1,4 +1,4 @@
-import { fromZonedTime, toZonedTime, format } from 'date-fns-tz';
+import { fromZonedTime, format } from 'date-fns-tz';
 
 /**
  * Constante para la zona horaria de Bogotá, Colombia
@@ -10,23 +10,26 @@ export const BOGOTA_TIMEZONE = 'America/Bogota';
  * @returns Date en zona horaria America/Bogota
  */
 export function getBogotaDate(): Date {
-  const now = new Date();
-  // Convertir la fecha actual a la zona horaria de Bogotá
-  const bogotaTime = toZonedTime(now, BOGOTA_TIMEZONE);
-  return bogotaTime;
+  // Con process.env.TZ = 'America/Bogota' configurado en main.ts,
+  // new Date() ya devuelve la hora de Bogotá correctamente
+  return new Date();
 }
 
 /**
- * Convierte cualquier fecha a la zona horaria de Bogotá
- * @param date - Fecha a convertir
- * @returns Date en zona horaria America/Bogota
+ * Obtiene la fecha y hora actual en la zona horaria de Bogotá como string formateado
+ * Útil para guardar en campos varchar de la base de datos
+ * @param formatString - Formato deseado (por defecto: yyyy-MM-dd HH:mm:ss)
+ * @returns String formateado en zona horaria de Bogotá
  */
-export function toBogotaDate(date: Date): Date {
-  return toZonedTime(date, BOGOTA_TIMEZONE);
+export function getBogotaDateString(formatString: string = "yyyy-MM-dd HH:mm:ss"): string {
+  return format(new Date(), formatString, {
+    timeZone: BOGOTA_TIMEZONE,
+  });
 }
 
 /**
  * Convierte una fecha de Bogotá a UTC para guardar en la base de datos
+ * Útil cuando necesitas convertir fechas de la zona horaria de Bogotá a UTC
  * @param date - Fecha en zona horaria de Bogotá
  * @returns Date en UTC
  */
@@ -44,7 +47,7 @@ export function formatBogotaDate(
   date: Date,
   formatString: string = "yyyy-MM-dd'T'HH:mm:ss.SSSxxx",
 ): string {
-  return format(toBogotaDate(date), formatString, {
+  return format(date, formatString, {
     timeZone: BOGOTA_TIMEZONE,
   });
 }

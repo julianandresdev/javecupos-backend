@@ -99,14 +99,16 @@ export class CuposController {
   async update(
     @Param('id') id: string,
     @Body() updateCupoDto: UpdateCupoDto,
+    @Request() req,
   ): Promise<CupoResponseDto> {
     /**
      * Actualiza un cupo existente.
      * @param id - Identificador único del cupo a actualizar.
      * @param updateCupoDto - Datos para actualizar el cupo.
+     * @param req - Objeto de solicitud que contiene la información del usuario autenticado.
      * @returns El cupo actualizado.
      */
-    return this.cuposService.update(+id, updateCupoDto);
+    return this.cuposService.update(+id, updateCupoDto, req.user.id);
   }
 
   @Delete(':id')

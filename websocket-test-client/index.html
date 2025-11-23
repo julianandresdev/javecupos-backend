@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>JaveCupos · Test Client (Modular)</title>
+    <title>JaveCupos · Test Client (Completo)</title>
     <link rel="stylesheet" href="styles.css" />
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
@@ -11,162 +11,375 @@
   <body>
     <div class="app">
       <header class="app-header">
-        <h1>JaveCupos — Test Client</h1>
+        <h1>🚗 JaveCupos — Test Client</h1>
         <div class="header-controls">
           <label>Backend URL:
             <input id="backend-url" value="http://localhost:3000" />
           </label>
           <button id="save-backend">Guardar</button>
+          <div id="user-info-header" class="user-info-header hidden">
+            <span id="user-name-header">-</span>
+            <span id="user-role-header">-</span>
+            <button id="btn-logout-header" class="btn-small">Logout</button>
+          </div>
         </div>
       </header>
 
-      <main class="grid-main">
-        <!-- Auth Panel -->
-        <section class="panel" id="auth-panel">
-          <h2>🔐 Autenticación</h2>
-          <div class="auth-forms">
-            <div class="form-block">
-              <h3>Login</h3>
-              <input id="login-email" placeholder="email@example.com" />
-              <input id="login-password" type="password" placeholder="contraseña" />
-              <button id="btn-login">Iniciar sesión</button>
-            </div>
+      <!-- Tabs Navigation -->
+      <nav class="tabs-nav">
+        <button class="tab-btn active" data-tab="auth">🔐 Auth</button>
+        <button class="tab-btn" data-tab="cupos">🚗 Cupos</button>
+        <button class="tab-btn" data-tab="bookings">📅 Reservas</button>
+        <button class="tab-btn" data-tab="users">👥 Usuarios</button>
+        <button class="tab-btn" data-tab="notifications">🔔 Notificaciones</button>
+        <button class="tab-btn" data-tab="test-cases">🧪 Test Cases</button>
+        <button class="tab-btn" data-tab="generic">🌐 Generic API</button>
+        <button class="tab-btn" data-tab="websocket">⚡ WebSocket</button>
+      </nav>
 
-            <div class="form-block">
-              <h3>Registro</h3>
-              <input id="reg-name" placeholder="Nombre" />
-              <input id="reg-email" placeholder="email@example.com" />
-              <input id="reg-password" type="password" placeholder="contraseña" />
-              <button id="btn-register">Registrar</button>
-            </div>
-          </div>
+      <main class="main-content">
+        <!-- Auth Tab -->
+        <section class="tab-content active" id="tab-auth">
+          <div class="panel-grid">
+            <div class="panel">
+              <h2>🔐 Autenticación</h2>
+              <div class="auth-forms">
+                <div class="form-block">
+                  <h3>Login</h3>
+                  <input id="login-email" placeholder="email@example.com" />
+                  <input id="login-password" type="password" placeholder="contraseña" />
+                  <button id="btn-login">Iniciar sesión</button>
+                </div>
 
-          <div class="session-area">
-            <div id="user-info" class="hidden">
-              <strong id="user-name">-</strong>
-              <div id="user-role">-</div>
-              <div class="token-box">
-                <label>JWT:</label>
-                <textarea id="token-storage" readonly></textarea>
+                <div class="form-block">
+                  <h3>Registro</h3>
+                  <input id="reg-name" placeholder="Nombre" />
+                  <input id="reg-email" placeholder="email@example.com" />
+                  <input id="reg-password" type="password" placeholder="contraseña" />
+                  <input id="reg-phone" placeholder="Teléfono" />
+                  <input id="reg-age" type="number" placeholder="Edad" min="1" max="120" />
+                  <select id="reg-role">
+                    <option value="">Selecciona un rol</option>
+                    <option value="usuario">Usuario</option>
+                    <option value="conductor">Conductor</option>
+                    <option value="administrador">Administrador</option>
+                  </select>
+                  <button id="btn-register">Registrar</button>
+                </div>
               </div>
-              <button id="btn-logout">Cerrar sesión</button>
+
+              <div class="session-area">
+                <div id="user-info" class="hidden">
+                  <strong id="user-name">-</strong>
+                  <div id="user-role">-</div>
+                  <div class="token-box">
+                    <label>JWT:</label>
+                    <textarea id="token-storage" readonly></textarea>
+                  </div>
+                  <button id="btn-logout">Cerrar sesión</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <h2>📧 Gestión de Cuenta</h2>
+              <div class="form-block">
+                <h3>Verificar Email</h3>
+                <input id="verify-token" placeholder="Token de verificación" />
+                <button id="btn-verify-email">Verificar</button>
+              </div>
+
+              <div class="form-block">
+                <h3>Reenviar Verificación</h3>
+                <input id="resend-email" placeholder="email@example.com" />
+                <button id="btn-resend-verification">Reenviar</button>
+              </div>
+
+              <div class="form-block">
+                <h3>Recuperar Contraseña</h3>
+                <input id="forgot-email" placeholder="email@example.com" />
+                <button id="btn-forgot-password">Enviar</button>
+              </div>
+
+              <div class="form-block">
+                <h3>Restablecer Contraseña</h3>
+                <input id="reset-token" placeholder="Token de recuperación" />
+                <input id="reset-password" type="password" placeholder="Nueva contraseña" />
+                <button id="btn-reset-password">Restablecer</button>
+              </div>
+
+              <div class="form-block">
+                <h3>Perfil</h3>
+                <button id="btn-get-profile">Obtener Perfil</button>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- Auth Extra Panel -->
-        <section class="panel" id="auth-extra">
-          <h2>📧 Gestión de Cuenta</h2>
-          <div class="auth-forms">
-            <div class="form-block">
-              <h3>Verificar Email</h3>
-              <input id="verify-token" placeholder="Token de verificación" />
-              <button id="btn-verify-email">Verificar</button>
+        <!-- Cupos Tab -->
+        <section class="tab-content" id="tab-cupos">
+          <div class="panel-grid">
+            <div class="panel">
+              <h2>🚗 Crear Cupo</h2>
+              <div class="form-block">
+                <select id="cupo-destino" placeholder="Destino/Barrio">
+                  <option value="">Selecciona destino</option>
+                </select>
+                <input id="cupo-punto" placeholder="Punto de encuentro" />
+                <input id="cupo-descripcion" placeholder="Descripción (opcional)" />
+                <input id="cupo-asientos" type="number" value="4" min="1" max="8" placeholder="Asientos totales" />
+                <input id="cupo-hora" type="datetime-local" />
+                <input id="cupo-precio" type="number" placeholder="Precio" min="0" step="0.01" />
+                <input id="cupo-telefono" placeholder="Teléfono contacto (opcional)" />
+                <button id="btn-create-cupo">Crear Cupo</button>
+              </div>
             </div>
 
-            <div class="form-block">
-              <h3>Reenviar Verificación</h3>
-              <input id="resend-email" placeholder="email@example.com" />
-              <button id="btn-resend-verification">Reenviar</button>
+            <div class="panel">
+              <h2>📋 Listar Cupos</h2>
+              <button id="btn-list-cupos">Listar Todos</button>
+              <button id="btn-my-cupos">Mis Cupos</button>
+              <button id="btn-cupo-details">Ver Detalles</button>
+              <input id="cupo-id-details" type="number" placeholder="ID del cupo" />
             </div>
 
-            <div class="form-block">
-              <h3>Recuperar Contraseña</h3>
-              <input id="forgot-email" placeholder="email@example.com" />
-              <button id="btn-forgot-password">Enviar</button>
+            <div class="panel">
+              <h2>🔍 Búsqueda Avanzada</h2>
+              <select id="search-destino">
+                <option value="">Todos los destinos</option>
+              </select>
+              <input id="search-fecha" type="date" />
+              <input id="search-asientos-min" type="number" min="1" placeholder="Asientos mínimos" />
+              <input id="search-precio-min" type="number" min="0" placeholder="Precio mínimo" />
+              <input id="search-precio-max" type="number" min="0" placeholder="Precio máximo" />
+              <select id="search-estado">
+                <option value="">Todos los estados</option>
+                <option value="Disponible">Disponible</option>
+                <option value="En curso">En curso</option>
+                <option value="Completado">Completado</option>
+                <option value="Cancelado">Cancelado</option>
+              </select>
+              <button id="btn-search-cupos">Buscar</button>
             </div>
 
-            <div class="form-block">
-              <h3>Restablecer Contraseña</h3>
-              <input id="reset-token" placeholder="Token de recuperación" />
-              <input id="reset-password" type="password" placeholder="Nueva contraseña" />
-              <button id="btn-reset-password">Restablecer</button>
+            <div class="panel">
+              <h2>✏️ Gestionar Cupo</h2>
+              <input id="cupo-id-update" type="number" placeholder="ID del cupo" />
+              <input id="cupo-update-punto" placeholder="Nuevo punto de encuentro" />
+              <input id="cupo-update-descripcion" placeholder="Nueva descripción" />
+              <input id="cupo-update-asientos" type="number" placeholder="Nuevos asientos disponibles" />
+              <input id="cupo-update-precio" type="number" placeholder="Nuevo precio" />
+              <button id="btn-update-cupo">Actualizar Cupo</button>
+              <button id="btn-cancel-cupo">Cancelar Cupo</button>
+              <button id="btn-delete-cupo" class="btn-danger">Eliminar Cupo (Admin)</button>
             </div>
           </div>
         </section>
 
-        <!-- Cupos Panel -->
-        <section class="panel" id="cupos-panel">
-          <h2>🚗 Cupos (Viajes)</h2>
-          <div class="form-block">
-            <h3>Crear Cupo</h3>
-            <input id="cupo-destino" placeholder="Destino/Barrio" />
-            <input id="cupo-punto" placeholder="Punto de encuentro" />
-            <input id="cupo-asientos" type="number" value="4" min="1" max="8" />
-            <input id="cupo-hora" type="datetime-local" />
-            <input id="cupo-precio" type="number" placeholder="Precio" min="0" />
-            <button id="btn-create-cupo">Crear</button>
-          </div>
-          <div style="margin-top:12px">
-            <button id="btn-list-cupos">📋 Listar Cupos</button>
-            <button id="btn-my-cupos">🚗 Mis Cupos</button>
+        <!-- Bookings Tab -->
+        <section class="tab-content" id="tab-bookings">
+          <div class="panel-grid">
+            <div class="panel">
+              <h2>📅 Crear Reserva</h2>
+              <div class="form-block">
+                <input id="booking-cupo-id" type="number" placeholder="ID del Cupo" />
+                <input id="booking-asientos" type="number" value="1" min="1" max="8" placeholder="Asientos a reservar" />
+                <button id="btn-create-booking">Reservar</button>
+              </div>
+            </div>
+
+            <div class="panel">
+              <h2>📋 Mis Reservas</h2>
+              <button id="btn-my-bookings">Ver Mis Reservas</button>
+              <button id="btn-all-bookings">Todas (Admin/Driver)</button>
+              <input id="booking-cupo-filter" type="number" placeholder="Filtrar por Cupo ID" />
+              <button id="btn-bookings-by-cupo">Reservas del Cupo</button>
+            </div>
+
+            <div class="panel">
+              <h2>✅ Gestionar Reserva</h2>
+              <input id="booking-id-manage" type="number" placeholder="ID de la Reserva" />
+              <div class="button-group">
+                <button id="btn-confirm-booking" class="btn-success">Confirmar (Conductor)</button>
+                <button id="btn-reject-booking" class="btn-warning">Rechazar (Conductor)</button>
+                <button id="btn-cancel-booking" class="btn-danger">Cancelar (Usuario)</button>
+              </div>
+            </div>
           </div>
         </section>
 
-        <!-- Bookings Panel -->
-        <section class="panel" id="bookings-panel">
-          <h2>📅 Reservas</h2>
-          <div class="form-block">
-            <h3>Crear Reserva</h3>
-            <input id="booking-cupo-id" type="number" placeholder="ID del Cupo" />
-            <input id="booking-asientos" type="number" value="1" min="1" max="8" />
-            <button id="btn-create-booking">Reservar</button>
-          </div>
-          <div style="margin-top:12px">
-            <button id="btn-my-bookings">📋 Mis Reservas</button>
-            <button id="btn-all-bookings">👤 Todas</button>
+        <!-- Users Tab -->
+        <section class="tab-content" id="tab-users">
+          <div class="panel-grid">
+            <div class="panel">
+              <h2>👥 Usuarios</h2>
+              <button id="btn-all-users">Listar Todos</button>
+              <button id="btn-user-details">Ver Usuario</button>
+              <input id="user-id-details" type="number" placeholder="ID del usuario" />
+            </div>
+
+            <div class="panel">
+              <h2>🔍 Búsqueda</h2>
+              <input id="search-user-name" placeholder="Nombre" />
+              <input id="search-user-email" placeholder="Email" />
+              <select id="search-user-role">
+                <option value="">Todos los roles</option>
+                <option value="usuario">Usuario</option>
+                <option value="conductor">Conductor</option>
+                <option value="administrador">Administrador</option>
+              </select>
+              <button id="btn-search-users">Buscar</button>
+            </div>
+
+            <div class="panel">
+              <h2>✏️ Gestionar Usuario</h2>
+              <input id="user-id-manage" type="number" placeholder="ID del usuario" />
+              <input id="user-update-name" placeholder="Nuevo nombre" />
+              <input id="user-update-phone" placeholder="Nuevo teléfono" />
+              <input id="user-update-age" type="number" placeholder="Nueva edad" />
+              <button id="btn-update-user">Actualizar Usuario</button>
+              <button id="btn-delete-user" class="btn-danger">Eliminar Usuario</button>
+            </div>
+
+            <div class="panel">
+              <h2>➕ Crear Usuario</h2>
+              <input id="create-user-name" placeholder="Nombre" />
+              <input id="create-user-email" placeholder="Email" />
+              <input id="create-user-password" type="password" placeholder="Contraseña" />
+              <input id="create-user-phone" placeholder="Teléfono" />
+              <input id="create-user-age" type="number" placeholder="Edad" />
+              <select id="create-user-role">
+                <option value="usuario">Usuario</option>
+                <option value="conductor">Conductor</option>
+                <option value="administrador">Administrador</option>
+              </select>
+              <button id="btn-create-user">Crear Usuario</button>
+            </div>
           </div>
         </section>
 
-        <!-- Notifications Panel -->
-        <section class="panel" id="notifs-panel">
-          <h2>🔔 Notificaciones</h2>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button id="btn-my-notifications">Mi Bandeja</button>
-            <button id="btn-pending-notifs">Pendientes</button>
-            <button id="btn-unread-count">Sin Leer</button>
+        <!-- Notifications Tab -->
+        <section class="tab-content" id="tab-notifications">
+          <div class="panel-grid">
+            <div class="panel">
+              <h2>🔔 Notificaciones</h2>
+              <div class="notification-controls">
+                <button id="btn-my-notifications">Mi Bandeja</button>
+                <button id="btn-pending-notifs">Pendientes</button>
+                <button id="btn-unread-count">Conteo Sin Leer</button>
+                <button id="btn-mark-all-read">Marcar Todas Leídas</button>
+                <button id="btn-refresh-notifications">🔄 Actualizar</button>
+              </div>
+              <div id="unread-count-display" class="unread-count-display"></div>
+            </div>
+
+            <div class="panel full-width">
+              <h2>📋 Lista de Notificaciones</h2>
+              <div id="notifications-list" class="notifications-list">
+                <p class="text-muted">Carga tus notificaciones para verlas aquí</p>
+              </div>
+            </div>
+
+            <div class="panel">
+              <h2>➕ Crear Notificación</h2>
+              <input id="create-notif-user-id" type="number" placeholder="User ID (opcional)" />
+              <select id="create-notif-type">
+                <option value="Reserva creada">Reserva creada</option>
+                <option value="Reserva confirmada">Reserva confirmada</option>
+                <option value="Reserva cancelada">Reserva cancelada</option>
+                <option value="Cupo creado">Cupo creado</option>
+                <option value="Cupo modificado">Cupo modificado</option>
+                <option value="Cupo cancelado">Cupo cancelado</option>
+              </select>
+              <textarea id="create-notif-message" placeholder="Mensaje"></textarea>
+              <button id="btn-create-notif">Crear Notificación</button>
+            </div>
           </div>
         </section>
 
-        <!-- Users Panel -->
-        <section class="panel" id="users-panel">
-          <h2>👥 Usuarios</h2>
-          <button id="btn-all-users">Listar Todos</button>
+        <!-- Test Cases Tab -->
+        <section class="tab-content" id="tab-test-cases">
+          <div class="panel-grid">
+            <div class="panel">
+              <h2>🧪 Casos de Prueba Preconfigurados</h2>
+              <div class="test-cases">
+                <h3>Flujos Completos</h3>
+                <button class="test-case-btn" data-test="flow-register-verify-login">1. Registro → Verificación → Login</button>
+                <button class="test-case-btn" data-test="flow-create-cupo-booking">2. Crear Cupo → Reservar → Confirmar</button>
+                <button class="test-case-btn" data-test="flow-booking-reject">3. Crear Reserva → Rechazar</button>
+                <button class="test-case-btn" data-test="flow-cancel-cupo">4. Crear Cupo → Cancelar</button>
+                
+                <h3>Casos de Error</h3>
+                <button class="test-case-btn" data-test="error-duplicate-email">Email Duplicado</button>
+                <button class="test-case-btn" data-test="error-invalid-credentials">Credenciales Inválidas</button>
+                <button class="test-case-btn" data-test="error-unauthorized">Sin Autenticación</button>
+                <button class="test-case-btn" data-test="error-forbidden">Sin Permisos</button>
+                <button class="test-case-btn" data-test="error-past-date">Fecha Pasada</button>
+                <button class="test-case-btn" data-test="error-insufficient-seats">Asientos Insuficientes</button>
+                <button class="test-case-btn" data-test="error-duplicate-booking">Reserva Duplicada</button>
+                <button class="test-case-btn" data-test="error-own-cupo">Reservar Propio Cupo</button>
+                
+                <h3>Validaciones</h3>
+                <button class="test-case-btn" data-test="validate-cupo-update-permissions">Permisos Actualizar Cupo</button>
+                <button class="test-case-btn" data-test="validate-booking-confirm-permissions">Permisos Confirmar Reserva</button>
+                <button class="test-case-btn" data-test="validate-booking-state">Estados de Reserva</button>
+                <button class="test-case-btn" data-test="validate-seats-calculation">Cálculo de Asientos</button>
+              </div>
+            </div>
+
+            <div class="panel">
+              <h2>📊 Resultados de Tests</h2>
+              <div id="test-results" class="test-results">
+                <p class="text-muted">Ejecuta un caso de prueba para ver resultados</p>
+              </div>
+            </div>
+          </div>
         </section>
 
-        <!-- API Tester -->
-        <section class="panel full-width" id="api-tester">
-          <h2>🧪 Tester Genérico</h2>
-          <div class="form-row">
-            <select id="req-method"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select>
-            <input id="req-path" placeholder="/auth/profile" />
-            <button id="btn-send">Enviar</button>
-          </div>
-          <textarea id="req-body" placeholder='JSON body para POST/PUT/PATCH'></textarea>
-          <div class="result">
-            <h4>Respuesta</h4>
-            <pre id="response"></pre>
+        <!-- Generic API Tab -->
+        <section class="tab-content" id="tab-generic">
+          <div class="panel full-width">
+            <h2>🧪 Tester Genérico</h2>
+            <div class="form-row">
+              <select id="req-method">
+                <option>GET</option>
+                <option>POST</option>
+                <option>PUT</option>
+                <option>PATCH</option>
+                <option>DELETE</option>
+              </select>
+              <input id="req-path" placeholder="/auth/profile" />
+              <button id="btn-send">Enviar</button>
+            </div>
+            <textarea id="req-body" placeholder='JSON body para POST/PUT/PATCH'></textarea>
+            <div class="result">
+              <h4>Respuesta <span id="response-status" class="status-badge"></span></h4>
+              <pre id="response"></pre>
+            </div>
           </div>
         </section>
 
-        <!-- WebSocket Panel -->
-        <section class="panel full-width" id="ws-panel">
-          <h2>⚡ WebSocket / Notifications</h2>
-          <div class="ws-controls">
-            <button id="ws-connect">Conectar WS</button>
-            <button id="ws-disconnect" disabled>Desconectar</button>
-            <button id="ws-request-notifs">Pedir notificaciones</button>
-            <button id="ws-mark-all">Marcar todas leídas</button>
-          </div>
-          <div class="ws-log">
-            <h4>Eventos</h4>
-            <div id="ws-log-area" class="log"></div>
+        <!-- WebSocket Tab -->
+        <section class="tab-content" id="tab-websocket">
+          <div class="panel full-width">
+            <h2>⚡ WebSocket / Notificaciones</h2>
+            <div class="ws-controls">
+              <button id="ws-connect">Conectar WS</button>
+              <button id="ws-disconnect" disabled>Desconectar</button>
+              <button id="ws-request-notifs">Pedir notificaciones</button>
+              <button id="ws-mark-all">Marcar todas leídas</button>
+            </div>
+            <div class="ws-log">
+              <h4>Eventos</h4>
+              <div id="ws-log-area" class="log"></div>
+            </div>
           </div>
         </section>
       </main>
 
+
       <footer class="footer">
-        <small>Cliente de pruebas modular — JWT persistente, refresh token, todos los endpoints</small>
+        <small>Cliente de pruebas completo — Todos los endpoints | JWT persistente | WebSocket en tiempo real</small>
       </footer>
     </div>
 

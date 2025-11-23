@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserEntity } from '../../users/entities/user.entity';
 import { UserRole, UserStatus } from '../../users/interfaces/user.interface';
+import { getBogotaDateString } from '../../common/utils/date-time.util';
 
 @Injectable()
 export class UserSeeder {
@@ -62,7 +63,14 @@ export class UserSeeder {
       });
 
       if (!existingUser) {
-        const user = this.userRepository.create(userData);
+        // Obtener la fecha actual formateada en zona horaria de Bogotá
+        const nowString = getBogotaDateString();
+        const user = this.userRepository.create({
+          ...userData,
+          // Guardar fechas como string formateado en zona horaria de Bogotá (compatible con varchar)
+          createdAt: nowString as any,
+          updatedAt: nowString as any,
+        });
         await this.userRepository.save(user);
         console.log(`✅ Created user: ${user.email}`);
       } else {

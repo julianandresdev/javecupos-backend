@@ -1,34 +1,37 @@
-# JaveCupos — Test Client (Modular)
+# JaveCupos — Test Client (Completo)
 
-Cliente de pruebas interactivo para la API de JaveCupos. Permite probar todos los endpoints sin escribir código.
+Cliente de pruebas interactivo y completo para la API de JaveCupos. Permite probar todos los endpoints, casos de prueba preconfigurados, y validar el funcionamiento completo del sistema.
 
-## Características
+## 🚀 Características
 
-- ✅ **Autenticación**: Login, registro, verificación de email, recuperación de contraseña
+- ✅ **Autenticación Completa**: Login, registro, verificación de email, recuperación de contraseña, perfil
 - 💾 **Persistencia**: JWT y datos de usuario en `localStorage` (se restauran al recargar)
 - 🔄 **Refresh Token**: Renovación automática de JWT expirado
-- 🚗 **Cupos**: Crear, listar, filtrar viajes
-- 📅 **Reservas**: Crear y gestionar reservas de asientos
-- 🔔 **Notificaciones**: Escuchar en tiempo real vía WebSocket, marcar como leídas
-- 👥 **Usuarios**: Listar y buscar usuarios
-- 🧪 **Tester genérico**: Enviar peticiones HTTP personalizadas (GET, POST, PUT, PATCH, DELETE)
+- 🚗 **Cupos Completo**: Crear, listar, buscar, actualizar, cancelar, eliminar
+- 📅 **Reservas Completo**: Crear, listar, confirmar, rechazar, cancelar
+- 👥 **Usuarios Completo**: Listar, buscar, crear, actualizar, eliminar
+- 🔔 **Notificaciones Completo**: Ver, marcar como leídas, eliminar, crear manualmente
+- ⚡ **WebSocket**: Escuchar notificaciones en tiempo real
+- 🧪 **Test Cases**: Casos de prueba preconfigurados del plan de testing
+- 🌐 **Tester Genérico**: Enviar peticiones HTTP personalizadas
+- 🎨 **UI Mejorada**: Tabs organizados, códigos de estado HTTP, indicadores visuales
 
-## Estructura
+## 📁 Estructura
 
 ```
 websocket-test-client/
-├── index.html        # UI (formularios, paneles)
-├── app.js            # Lógica (eventos, API calls, WebSocket)
-├── styles.css        # Estilos
-└── README.md         # Este archivo
+├── index.html        # UI principal con tabs organizados
+├── app.js            # Lógica completa (todos los endpoints)
+├── styles.css        # Estilos mejorados
+└── README.md         # Esta documentación
 ```
 
-## Cómo usar
+## 🎯 Cómo usar
 
 ### 1. Levanta el backend
 
-```powershell
-cd c:\Users\julih\Documents\Projects\javecupos-backend
+```bash
+cd javecupos-backend
 npm run start:dev
 # Opcional: npm run seed (para datos de prueba)
 ```
@@ -39,7 +42,7 @@ npm run start:dev
 - Arrastra el archivo al navegador o
 - Abre desde VS Code con "Live Server" extension
 
-### 3. Configura la URL del backend (si es necesario)
+### 3. Configura la URL del backend
 
 Por defecto: `http://localhost:3000`
 
@@ -47,213 +50,393 @@ Si tu API corre en otro puerto:
 1. Cambia "Backend URL" en la cabecera
 2. Haz clic en "Guardar"
 
-### 4. Registrate y loguéate
+## 📋 Guía de Uso por Tabs
 
-#### Panel de Autenticación
+### 🔐 Tab: Auth (Autenticación)
 
-**Registro**:
-- Ingresa nombre, email, contraseña
-- Haz clic en "Registrar"
-- Respuesta: `{ message: "Usuario registrado..." }`
+#### Login
+1. Ingresa email y contraseña
+2. Haz clic en "Iniciar sesión"
+3. El JWT se guarda automáticamente
+4. Se muestra tu información de usuario
+5. WebSocket se conecta automáticamente
 
-**Login**:
-- Ingresa email y contraseña
-- El JWT se guarda automáticamente en `localStorage`
-- El usuario y rol se muestran en la sesión
+#### Registro
+1. Completa todos los campos (nombre, email, contraseña, teléfono, edad, rol)
+2. Haz clic en "Registrar"
+3. Recibirás un mensaje de confirmación
+4. **Importante**: Debes verificar tu email antes de poder iniciar sesión
 
-**Gestión de Cuenta**:
-- Verificar email (si tienes el token del email)
-- Reenviar verificación
-- Recuperar contraseña (envía token por email)
-- Restablecer contraseña (con token + nueva contraseña)
+#### Gestión de Cuenta
+- **Verificar Email**: Ingresa el token recibido por email
+- **Reenviar Verificación**: Reenvía el email de verificación
+- **Recuperar Contraseña**: Solicita un token de recuperación
+- **Restablecer Contraseña**: Cambia tu contraseña con el token
+- **Obtener Perfil**: Ver tu información de usuario actual
 
-### 5. Prueba endpoints por rol
+### 🚗 Tab: Cupos
 
-#### Como Conductor (role: `conductor`)
+#### Crear Cupo
+1. Selecciona destino (barrio)
+2. Ingresa punto de encuentro
+3. Opcional: descripción y teléfono de contacto
+4. Ingresa asientos totales (1-8)
+5. Selecciona fecha y hora de salida (debe ser futura)
+6. Ingresa precio
+7. Haz clic en "Crear Cupo"
+8. **Requisito**: Debes estar autenticado como `conductor` o `administrador`
 
-**Crear Cupo**:
-- Rellena: destino, punto de encuentro, asientos, hora, precio
-- Haz clic en "Crear"
-- Se envía: `POST /cupos` con JSON
+#### Listar Cupos
+- **Listar Todos**: Muestra todos los cupos activos (público)
+- **Mis Cupos**: Muestra solo tus cupos como conductor
+- **Ver Detalles**: Ver información completa de un cupo por ID
 
-**Listar Mis Cupos**:
-- Haz clic en "🚗 Mis Cupos"
-- Muestra cupos creados por ti
+#### Búsqueda Avanzada
+Filtra cupos por:
+- Destino (barrio)
+- Fecha de salida
+- Asientos mínimos
+- Rango de precios (mínimo y máximo)
+- Estado (Disponible, En curso, Completado, Cancelado)
 
-#### Como Usuario Común (role: `usuario`)
+#### Gestionar Cupo
+- **Actualizar Cupo**: Modifica punto de encuentro, descripción, asientos disponibles, precio
+  - Solo puedes actualizar tus propios cupos
+- **Cancelar Cupo**: Cancela un cupo (solo el conductor dueño)
+- **Eliminar Cupo**: Eliminación permanente (solo administradores)
 
-**Buscar Cupos**:
-- Haz clic en "📋 Listar Cupos"
-- Muestra cupos disponibles
+### 📅 Tab: Reservas
 
-**Crear Reserva**:
-- Rellena: ID del cupo, cantidad de asientos
-- Haz clic en "Reservar"
-- Se envía: `POST /bookings`
+#### Crear Reserva
+1. Ingresa el ID del cupo
+2. Ingresa cantidad de asientos a reservar
+3. Haz clic en "Reservar"
+4. **Validaciones**:
+   - El cupo debe estar disponible y activo
+   - Debe haber asientos suficientes
+   - No puedes reservar tu propio cupo
+   - No puedes tener múltiples reservas activas para el mismo cupo
 
-**Ver Mis Reservas**:
-- Haz clic en "📋 Mis Reservas"
-- Muestra reservas confirmadas
+#### Mis Reservas
+- **Ver Mis Reservas**: Todas tus reservas como usuario
+- **Todas (Admin/Driver)**: Ver todas las reservas activas (requiere permisos)
+- **Reservas del Cupo**: Ver reservas de un cupo específico (solo el conductor del cupo)
 
-#### Notificaciones (Todos)
+#### Gestionar Reserva
+- **Confirmar (Conductor)**: Confirma una reserva pendiente
+  - Solo el conductor del cupo puede confirmar
+  - Los asientos ya están restados (no se vuelven a restar)
+- **Rechazar (Conductor)**: Rechaza una reserva pendiente
+  - Solo el conductor del cupo puede rechazar
+  - Los asientos se devuelven al cupo
+- **Cancelar (Usuario)**: Cancela tu propia reserva
+  - Solo puedes cancelar tus propias reservas
+  - Los asientos se devuelven al cupo
 
-**Ver Notificaciones**:
-- "Mi Bandeja" → todas tus notificaciones
-- "Pendientes" → solo las no leídas
-- "Sin Leer" → conteo
+### 👥 Tab: Usuarios
 
-**WebSocket en tiempo real**:
-1. Haz clic en "Conectar WS"
-2. Recibirás notificaciones en tiempo real
-3. Puedes "Pedir notificaciones" o "Marcar todas leídas"
+#### Listar Usuarios
+- **Listar Todos**: Muestra todos los usuarios activos
+- **Ver Usuario**: Ver detalles de un usuario por ID
 
-### 6. Tester genérico
+#### Búsqueda
+Filtra usuarios por:
+- Nombre
+- Email
+- Rol (usuario, conductor, administrador)
 
-Para probar cualquier endpoint:
+#### Gestionar Usuario
+- **Actualizar Usuario**: Modifica nombre, teléfono, edad
+- **Eliminar Usuario**: Elimina un usuario permanentemente
 
-1. Elige método: GET, POST, PUT, PATCH, DELETE
-2. Ingresa ruta: `/auth/profile`, `/cupos/1`, etc.
-3. Si es POST/PUT/PATCH, rellena el body JSON
+#### Crear Usuario
+Crea un nuevo usuario manualmente (útil para testing)
+
+### 🔔 Tab: Notificaciones
+
+#### Ver Notificaciones
+- **Mi Bandeja**: Todas tus notificaciones
+- **Pendientes**: Solo las no leídas
+- **Conteo Sin Leer**: Número de notificaciones pendientes
+
+#### Gestionar Notificación
+- **Marcar como Leída**: Marca una notificación específica como leída
+- **Marcar Todas Leídas**: Marca todas tus notificaciones como leídas
+- **Eliminar**: Elimina una notificación
+
+#### Crear Notificación
+Crea una notificación manualmente (útil para testing)
+
+### 🧪 Tab: Test Cases
+
+Casos de prueba preconfigurados del plan de testing:
+
+#### Flujos Completos
+1. **Registro → Verificación → Login**: Flujo completo de registro
+2. **Crear Cupo → Reservar → Confirmar**: Flujo completo de reserva
+3. **Crear Reserva → Rechazar**: Flujo de rechazo
+4. **Crear Cupo → Cancelar**: Flujo de cancelación
+
+#### Casos de Error
+- Email Duplicado
+- Credenciales Inválidas
+- Sin Autenticación
+- Sin Permisos
+- Fecha Pasada
+- Asientos Insuficientes
+- Reserva Duplicada
+- Reservar Propio Cupo
+
+#### Validaciones
+- Permisos Actualizar Cupo
+- Permisos Confirmar Reserva
+- Estados de Reserva
+- Cálculo de Asientos
+
+**Nota**: Algunos tests son manuales y requieren interacción. Los resultados se muestran en el panel de resultados.
+
+### 🌐 Tab: Generic API
+
+Tester genérico para cualquier endpoint:
+
+1. Selecciona método HTTP: GET, POST, PUT, PATCH, DELETE
+2. Ingresa la ruta: `/auth/profile`, `/cupos/1`, etc.
+3. Si es POST/PUT/PATCH, ingresa el body JSON
 4. Haz clic en "Enviar"
+5. Verás la respuesta con código de estado HTTP
 
 **Ejemplo**:
 - Método: `GET`
 - Ruta: `/auth/profile`
 - Body: (vacío)
-- Resultado: Tu perfil JSON
+- Resultado: Tu perfil JSON con código 200
 
-## Payloads de ejemplo
+### ⚡ Tab: WebSocket
 
-### Crear Cupo
+#### Conectar
+1. Haz clic en "Conectar WS"
+2. Se conecta automáticamente al namespace `/notifications`
+3. Requiere estar autenticado
 
-```json
-{
-  "destino": "Centro Comercial",
-  "puntoEncuentro": "Terminal Transporte",
-  "asientosTotales": 4,
-  "asientosDisponibles": 4,
-  "horaSalida": "2025-11-15T10:30:00.000Z",
-  "precio": 5000
-}
-```
+#### Funciones
+- **Pedir notificaciones**: Solicita todas tus notificaciones
+- **Marcar todas leídas**: Marca todas como leídas vía WebSocket
 
-### Crear Reserva
+#### Eventos Recibidos
+- `new-notification`: Nueva notificación en tiempo real
+- `notifications-list`: Lista completa de notificaciones
+- `pending-notifications`: Solo notificaciones pendientes
 
-```json
-{
-  "cupoId": 1,
-  "asientosReservados": 2
-}
-```
+## 📊 Códigos de Estado HTTP
 
-### Registrar Usuario
+El cliente muestra códigos de estado con colores:
 
-```json
-{
-  "name": "Juan Pérez",
-  "email": "juan@example.com",
-  "password": "SecurePass123"
-}
-```
+- 🟢 **200-299 (Verde)**: Éxito
+- 🟡 **300-399 (Amarillo)**: Redirección
+- 🔴 **400+ (Rojo)**: Error
 
-## Persistencia & Seguridad
+Los códigos comunes:
+- `200`: OK
+- `201`: Created
+- `400`: Bad Request (validación fallida)
+- `401`: Unauthorized (sin autenticación)
+- `403`: Forbidden (sin permisos)
+- `404`: Not Found (recurso no existe)
+- `500`: Internal Server Error
+
+## 🔐 Permisos y Roles
+
+### Roles Disponibles
+- `usuario`: Usuario regular (puede reservar)
+- `conductor`: Conductor (puede crear cupos, confirmar/rechazar reservas)
+- `administrador`: Administrador (acceso completo)
+
+### Endpoints por Rol
+
+**Públicos** (sin autenticación):
+- `GET /cupos` - Listar cupos
+- `GET /cupos/:id` - Ver cupo
+- `POST /auth/register` - Registro
+- `POST /auth/login` - Login
+
+**Requieren Autenticación**:
+- Todos los endpoints de `/bookings` (excepto algunos GET)
+- `GET /cupos/my-cupos`
+- `PUT /cupos/:id`
+- Todos los endpoints de `/users`
+- Todos los endpoints de `/notifications`
+
+**Requieren Rol Específico**:
+- `POST /cupos` - Requiere `conductor` o `administrador`
+- `PUT /cupos/:id` - Requiere ser el dueño del cupo
+- `PUT /bookings/:id/confirm` - Requiere ser conductor del cupo
+- `PUT /bookings/:id/reject` - Requiere ser conductor del cupo
+- `DELETE /cupos/:id` - Requiere `administrador`
+
+## 🧪 Casos de Prueba Preconfigurados
+
+### Flujos Completos
+
+#### 1. Registro → Verificación → Login
+1. Registra un nuevo usuario
+2. Verifica el email con el token recibido
+3. Inicia sesión con las credenciales
+
+#### 2. Crear Cupo → Reservar → Confirmar
+1. Como conductor, crea un cupo
+2. Como usuario diferente, crea una reserva
+3. Como conductor, confirma la reserva
+4. Verifica que los asientos se restaron correctamente
+
+#### 3. Crear Reserva → Rechazar
+1. Crea una reserva
+2. Como conductor, rechaza la reserva
+3. Verifica que los asientos se devolvieron
+
+### Casos de Error
+
+Todos los casos de error validan que el sistema rechaza correctamente operaciones inválidas.
+
+## 💾 Persistencia & Seguridad
 
 - **JWT**: Se guarda en `localStorage['jc_jwt']`
-- **Refresh Token**: Se guarda en `localStorage['jc_refresh_token']` (si el servidor lo devuelve)
-- **Usuario**: Se guarda en `localStorage['jc_user']` (decodificado del JWT)
+- **Refresh Token**: Se guarda en `localStorage['jc_refresh_token']`
+- **Usuario**: Se guarda en `localStorage['jc_user']`
 - **Expiración**: Se verifica automáticamente; si expira, intenta renovar
 
 **⚠️ Nota**: `localStorage` no es seguro para tokens en producción. Solo usar en desarrollo/testing.
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
 ### "No se conecta a WebSocket"
 - Verifica que el backend corre en el puerto correcto
 - WebSocket usa namespace `/notifications`
 - Asegúrate de haber iniciado sesión
+- Verifica CORS en el backend
 
 ### "Error 401 Unauthorized"
 - El JWT expiró o no es válido
 - Haz logout y vuelve a loguear
+- Verifica que el token se guardó correctamente
+
+### "Error 403 Forbidden"
+- No tienes los permisos necesarios
+- Verifica tu rol de usuario
+- Algunos endpoints requieren ser el dueño del recurso
 
 ### "CORS error"
-- Verifica que el backend tiene CORS habilitado para `http://localhost:...`
+- Verifica que el backend tiene CORS habilitado para tu origen
 - Ajusta `FRONTEND_URL` en `.env` del backend
+- Verifica los orígenes permitidos en `main.ts`
 
-## Endpoints disponibles (resumen)
+### "Error al crear cupo/reserva"
+- Verifica que todos los campos requeridos están completos
+- Verifica que la fecha es futura
+- Verifica que tienes los permisos necesarios
+- Revisa la respuesta del servidor para más detalles
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/auth/register` | Registrar usuario |
-| POST | `/auth/login` | Iniciar sesión |
-| GET | `/auth/profile` | Perfil del usuario |
-| POST | `/auth/logout` | Cerrar sesión |
-| GET | `/auth/verify-email?token=...` | Verificar email |
-| POST | `/auth/resend-verification` | Reenviar verificación |
-| POST | `/auth/forgot-password` | Solicitar recuperación |
-| POST | `/auth/reset-password` | Restablecer contraseña |
-| POST | `/cupos` | Crear cupo |
-| GET | `/cupos` | Listar cupos |
-| GET | `/cupos/my-cupos` | Mis cupos |
-| GET | `/cupos/:id` | Detalles cupo |
-| POST | `/bookings` | Crear reserva |
-| GET | `/bookings/mine` | Mis reservas |
-| GET | `/bookings` | Todas (admin/driver) |
-| GET | `/notifications` | Todas las notificaciones |
-| GET | `/notifications/pending` | No leídas |
-| GET | `/users` | Listar usuarios |
+## 📚 Endpoints Disponibles
 
-## WebSocket Events
+### Autenticación
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| POST | `/auth/register` | Registrar usuario | No |
+| POST | `/auth/login` | Iniciar sesión | No |
+| GET | `/auth/profile` | Perfil del usuario | Sí |
+| POST | `/auth/logout` | Cerrar sesión | Sí |
+| GET | `/auth/verify-email?token=...` | Verificar email | No |
+| POST | `/auth/resend-verification` | Reenviar verificación | No |
+| POST | `/auth/forgot-password` | Solicitar recuperación | No |
+| POST | `/auth/reset-password` | Restablecer contraseña | No |
 
-**Escucha**:
+### Cupos
+| Método | Ruta | Descripción | Auth | Rol |
+|--------|------|-------------|------|-----|
+| POST | `/cupos` | Crear cupo | Sí | Driver/Admin |
+| GET | `/cupos` | Listar cupos | No | - |
+| GET | `/cupos/my-cupos` | Mis cupos | Sí | - |
+| GET | `/cupos/:id` | Ver cupo | No | - |
+| PUT | `/cupos/:id` | Actualizar cupo | Sí | Owner |
+| PUT | `/cupos/:id/cancel` | Cancelar cupo | Sí | Owner |
+| DELETE | `/cupos/:id` | Eliminar cupo | Sí | Admin |
+
+### Reservas
+| Método | Ruta | Descripción | Auth | Rol |
+|--------|------|-------------|------|-----|
+| POST | `/bookings` | Crear reserva | Sí | - |
+| GET | `/bookings/mine` | Mis reservas | Sí | - |
+| GET | `/bookings` | Todas las reservas | Sí | Admin/Driver |
+| GET | `/bookings?cupoId=:id` | Reservas del cupo | Sí | Owner |
+| PUT | `/bookings/:id/confirm` | Confirmar reserva | Sí | Driver (Owner) |
+| PUT | `/bookings/:id/reject` | Rechazar reserva | Sí | Driver (Owner) |
+| PUT | `/bookings/:id/cancel` | Cancelar reserva | Sí | User (Owner) |
+
+### Usuarios
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| GET | `/users` | Listar usuarios | Sí |
+| GET | `/users/search` | Buscar usuarios | Sí |
+| GET | `/users/:id` | Ver usuario | Sí |
+| POST | `/users` | Crear usuario | Sí |
+| PUT | `/users/:id` | Actualizar usuario | Sí |
+| DELETE | `/users/:id` | Eliminar usuario | Sí |
+
+### Notificaciones
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| GET | `/notifications` | Todas las notificaciones | Sí |
+| GET | `/notifications/pending` | Pendientes | Sí |
+| GET | `/notifications/unread-count` | Conteo sin leer | Sí |
+| PATCH | `/notifications/:id/read` | Marcar como leída | Sí |
+| PATCH | `/notifications/mark-all-read` | Marcar todas leídas | Sí |
+| DELETE | `/notifications/:id` | Eliminar notificación | Sí |
+| POST | `/notifications` | Crear notificación | Sí |
+
+## ⚡ WebSocket Events
+
+### Escucha
 - `new-notification` → Nueva notificación en tiempo real
-- `notifications-list` → Lista de notificaciones
-- `pending-notifications` → Notificaciones no leídas
+- `notifications-list` → Lista completa de notificaciones
+- `pending-notifications` → Solo notificaciones pendientes
+- `connect` → Conexión establecida
+- `disconnect` → Desconexión
+- `connect_error` → Error de conexión
 
-**Emite**:
+### Emite
 - `get-notifications` → Pedir lista completa
 - `mark-all-read` → Marcar todas como leídas
-- `mark-as-read` → Marcar una como leída
 
-## Archivos del cliente
+## 🎨 Mejoras Implementadas
 
-**index.html**:
-- UI con secciones por funcionalidad
-- Formularios para cada operación
-- Respuesta JSON en tiempo real
+### UI/UX
+- ✅ Tabs organizados por funcionalidad
+- ✅ Códigos de estado HTTP con colores
+- ✅ Indicadores visuales de éxito/error
+- ✅ Formularios organizados y claros
+- ✅ Responsive design
 
-**app.js**:
-- Manejadores de eventos
-- Llamadas a API (`apiCall`)
-- Lógica de WebSocket
-- Persistencia en localStorage
-- Renovación automática de tokens
+### Funcionalidades
+- ✅ Todos los endpoints implementados
+- ✅ Casos de prueba preconfigurados
+- ✅ Validaciones en tiempo real
+- ✅ Manejo de errores mejorado
+- ✅ Persistencia de sesión
+- ✅ WebSocket automático
 
-**styles.css**:
-- Diseño responsive (mobile-first)
-- Grid layout para paneles
-- Tema morado/azul
+### Testing
+- ✅ Test cases del plan de testing
+- ✅ Flujos completos de negocio
+- ✅ Casos de error
+- ✅ Validaciones de permisos
 
-## Desarrollo
+## 📝 Notas de Desarrollo
 
-Si quieres agregar más endpoints:
+Si quieres agregar más funcionalidades:
 
-1. En `index.html`: Agrega un botón o formulario en la sección correspondiente
-2. En `app.js`: Agrega un event listener que llame a `apiCall(...)`
-3. Actualiza este README
+1. **Nuevo Endpoint**: Agrega el handler en la sección correspondiente de `app.js`
+2. **Nuevo Test Case**: Agrega el caso en `initTestCasesHandlers()` y crea la función de test
+3. **Nueva UI**: Agrega el HTML en el tab correspondiente y el handler en `app.js`
 
-Ejemplo:
-
-```javascript
-document.getElementById('btn-delete-user').addEventListener('click', async ()=>{
-  const userId = document.getElementById('user-id-input').value;
-  try{
-    const result = await apiCall(`/users/${userId}`, 'DELETE');
-    addResponse({ message: 'Usuario eliminado', response: result });
-  }catch(err){ addResponse({ error: err.message }); }
-});
-```
-
-## Licencia
+## 📄 Licencia
 
 Parte del proyecto JaveCupos.

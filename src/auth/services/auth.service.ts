@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -15,6 +16,8 @@ import {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
@@ -30,7 +33,7 @@ export class AuthService {
      * Este método delega la creación del usuario al UsersService, que automáticamente
      * asigna el estado PENDING. El usuario debe verificar su email antes de poder iniciar sesión.
      */
-    console.log(`Registrando nuevo usuario: ${createUserDto.email}`);
+    this.logger.log(`Registrando nuevo usuario: ${createUserDto.email}`);
 
     const user = await this.usersService.create({
       ...createUserDto,
@@ -56,25 +59,25 @@ export class AuthService {
      * 2. Que la cuenta esté activa (no PENDING ni INACTIVE)
      * 3. Que la contraseña sea correcta
      */
-    console.log(`Validando credenciales para: ${email}`);
+    this.logger.log(`Validando credenciales para: ${email}`);
 
     const user = await this.usersService.findByEmail(email);
 
     if (!user) {
-      console.warn(`Usuario no encontrado: ${email}`);
+      this.logger.warn(`Usuario no encontrado: ${email}`);
       return null;
     }
 
     // Validar estado de la cuenta
     if (user.status === UserStatus.PENDING) {
-      console.warn(`Intento de login con cuenta pendiente: ${email}`);
+      this.logger.warn(`Intento de login con cuenta pendiente: ${email}`);
       throw new UnauthorizedException(
         'Debes verificar tu email antes de iniciar sesión. Revisa tu correo.',
       );
     }
 
     if (user.status === UserStatus.INACTIVE) {
-      console.warn(`Intento de login con cuenta inactiva: ${email}`);
+      this.logger.warn(`Intento de login con cuenta inactiva: ${email}`);
       throw new UnauthorizedException(
         'Tu cuenta está inactiva. Contacta soporte.',
       );
@@ -84,11 +87,11 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      console.warn(`Contraseña incorrecta para: ${email}`);
+      this.logger.warn(`Contraseña incorrecta para: ${email}`);
       return null;
     }
 
-    console.log(`Usuario validado exitosamente: ${email}`);
+    this.logger.log(`Usuario validado exitosamente: ${email}`);
     return user;
   }
 
@@ -108,7 +111,7 @@ export class AuthService {
      * El JWT contiene el payload: { email, sub: id, role }
      * Expira en 15 minutos (configurado en auth.module.ts)
      */
-    console.log(`Generando JWT para usuario: ${user.email}`);
+    this.logger.log(`Generando JWT para usuario: ${user.email}`);
 
     const payload = { email: user.email, sub: user.id, role: user.role };
 
@@ -131,7 +134,7 @@ export class AuthService {
      * Este método cambia el estado del usuario de PENDING a ACTIVE,
      * permitiéndole iniciar sesión en el sistema.
      */
-    console.log(`Verificando email para usuario ID: ${userId}`);
+    this.logger.log(`Verificando email para usuario ID: ${userId}`);
 
     const user = await this.usersService.findOne(userId);
 
@@ -140,7 +143,7 @@ export class AuthService {
     }
 
     if (user.status === UserStatus.ACTIVE) {
-      console.warn(`Intento de verificar cuenta ya activa: ${user.email}`);
+      this.logger.warn(`Intento de verificar cuenta ya activa: ${user.email}`);
       throw new BadRequestException(
         'Tu cuenta ya está verificada. Puedes iniciar sesión.',
       );
@@ -149,7 +152,7 @@ export class AuthService {
     // Actualizar status a ACTIVE
     await this.usersService.update(userId, { status: UserStatus.ACTIVE });
 
-    console.log(`Email verificado exitosamente para: ${user.email}`);
+    this.logger.log(`Email verificado exitosamente para: ${user.email}`);
 
     return {
       message: 'Email verificado correctamente. Ya puedes iniciar sesión.',
@@ -168,7 +171,7 @@ export class AuthService {
      * independientemente de si el usuario existe o no (previene enumeración de cuentas).
      * La lógica de envío de email está en el controlador.
      */
-    console.log(`Solicitud de reenvío de verificación para: ${email}`);
+    this.logger.log(`Solicitud de reenvío de verificación para: ${email}`);
 
     const user = await this.usersService.findByEmail(email);
 
@@ -202,7 +205,7 @@ export class AuthService {
      * Este método hashea la nueva contraseña con bcrypt (10 rounds) antes de guardarla.
      * Es utilizado por el flujo de forgot-password después de validar el token OTP.
      */
-    console.log(`Cambiando contraseña para usuario ID: ${userId}`);
+    this.logger.log(`Cambiando contraseña para usuario ID: ${userId}`);
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
@@ -210,7 +213,7 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    console.log(
+    this.logger.log(
       `Contraseña actualizada exitosamente para usuario ID: ${userId}`,
     );
 
