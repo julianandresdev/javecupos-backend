@@ -3,14 +3,28 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { UsersModule } from './users/users.module';
+import { UserEntity } from './users/entities/user.entity';
+import { AuthModule } from './auth/auth.module';
+import { RefreshTokenEntity } from './auth/entities/refresh-token.entity';
+import { TokenResetEntity } from './auth/entities/token-reset.entity';
+import { CupoEntity } from './cupos/entities/cupo.entity';
+import { BookingEntity } from './bookings/entities/booking.entity';
+import { NotificationEntity } from './notifications/entity/notifications.entity';
+import { CuposModule } from './cupos/cupos.module';
+import { BookingsModule } from './bookings/bookings.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { SeedModule } from './database/seeds/seed.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
-  
-  
+
+    EventEmitterModule.forRoot(),
+
     // 🗄️ Configuración escalable de TypeORM (lee todo del .env)
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -20,14 +34,22 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
         const baseConfig = {
           synchronize: configService.get('DB_SYNCHRONIZE') === 'true',
           logging: configService.get('DB_LOGGING') === 'true',
-          entities: [],
+          entities: [
+            UserEntity,
+            CupoEntity,
+            BookingEntity,
+            NotificationEntity,
+            RefreshTokenEntity,
+            TokenResetEntity,
+          ],
         };
 
         // Para SQLite solo necesitamos el archivo de base de datos
         if (dbType === 'sqlite') {
           return {
             type: 'sqlite',
-            database: configService.get<string>('DB_DATABASE') || './javecupos.db',
+            database:
+              configService.get<string>('DB_DATABASE') || './javecupos.db',
             ...baseConfig,
           };
         } else {
@@ -45,8 +67,13 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
       },
       inject: [ConfigService],
     }),
-
-    ],
+    UsersModule,
+    AuthModule,
+    CuposModule,
+    BookingsModule,
+    NotificationsModule,
+    SeedModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
