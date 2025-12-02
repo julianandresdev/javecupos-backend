@@ -10,6 +10,7 @@ import {
   Res,
   BadRequestException,
   Query,
+  UnauthorizedException,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from '../services/auth.service';
@@ -187,20 +188,64 @@ export class AuthController {
      *
      * El usuario debe tener status ACTIVE para iniciar sesión.
      */
+    // Generar ambos tokens (access + refresh)
     const loginResult = await this.authService.login(req.user);
 
-    // Crear refresh token con información del dispositivo
-    const refreshToken = await this.refreshTokenService.createRefreshToken(
+    // ✅ Guardar EL MISMO refresh_token que se genera en loginResult
+    await this.refreshTokenService.createRefreshToken(
       req.user.id,
+      loginResult.refresh_token, // ⭐ Usar el mismo token
       REFRESH_TOKEN_EXPIRY,
       req.headers['user-agent'],
       req.ip,
     );
 
-    // Establecer refresh token en cookie segura
-    res.cookie('refreshToken', refreshToken, getCookieOptions());
+    // Establecer refresh token en cookie segura (doble protección)
+    res.cookie('refreshToken', loginResult.refresh_token, getCookieOptions());
 
     return loginResult;
+  }
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(@Body('refreshToken') refreshToken: string, @Request() req) {
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token no proporcionado');
+    }
+
+    try {
+      // Validar que el refresh token exista en BD y no haya expirado
+      const storedToken =
+        await this.refreshTokenService.findToken(refreshToken);
+
+      if (!storedToken || storedToken.expiresAt < new Date()) {
+        throw new UnauthorizedException('Refresh token inválido o expirado');
+      }
+
+      // Verificar y decodificar el JWT
+      const payload = await this.authService.verifyRefreshToken(refreshToken);
+
+      // Obtener usuario actualizado
+      const user = await this.authService.getUserData(payload.sub);
+
+      if (!user || user.status !== UserStatus.ACTIVE) {
+        throw new UnauthorizedException('Usuario no encontrado o inactivo');
+      }
+
+      // Generar NUEVO access_token
+      const { access_token } = await this.authService.generateTokens({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      });
+
+      // Retornar nuevo access_token (refresh_token sigue siendo el mismo)
+      return {
+        access_token,
+        refresh_token: refreshToken, // Retornar el mismo
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Refresh token inválido o expirado');
+    }
   }
 
   @Get('profile')

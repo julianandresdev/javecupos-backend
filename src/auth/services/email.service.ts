@@ -95,7 +95,7 @@ export class EmailService {
     name: string,
     token: string,
   ): Promise<void> {
-    const verificationLink = `${process.env.FRONTEND_URL}/auth/verify-email?token=${token}`;
+    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
 
     try {
       const htmlContent = `
