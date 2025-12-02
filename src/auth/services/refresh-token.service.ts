@@ -20,20 +20,17 @@ export class RefreshTokenService {
    */
   async createRefreshToken(
     userId: number,
+    token: string,
     expiresIn: number = 7 * 24 * 60 * 60 * 1000, // 7 días en ms
     userAgent?: string,
     ipAddress?: string,
   ): Promise<string> {
-    // Generar token único
-    const token = crypto.randomBytes(32).toString('hex');
-
     // Hash del token para almacenamiento seguro
-    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     const expiresAt = getBogotaDatePlusMilliseconds(expiresIn);
 
     await this.refreshTokenRepository.save({
-      token: hashedToken,
+      token,
       userId,
       expiresAt,
       userAgent,
@@ -97,6 +94,11 @@ export class RefreshTokenService {
   async cleanExpiredTokens(): Promise<void> {
     await this.refreshTokenRepository.delete({
       expiresAt: getBogotaDate(),
+    });
+  }
+  async findToken(token: string): Promise<RefreshTokenEntity | null> {
+    return this.refreshTokenRepository.findOne({
+      where: { token },
     });
   }
 }

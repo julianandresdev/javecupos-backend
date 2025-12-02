@@ -8,11 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../../users/services/users.service';
 import { CreateUserDto, UserResponseDto } from 'src/users/dto/user.dto';
-import {
-  User,
-  UserRole,
-  UserStatus,
-} from 'src/users/interfaces/user.interface';
+import { UserRole, UserStatus } from 'src/users/interfaces/user.interface';
 
 @Injectable()
 export class AuthService {
@@ -99,24 +95,36 @@ export class AuthService {
     id: number;
     email: string;
     role: UserRole;
-  }): Promise<{ access_token: string }> {
+  }): Promise<any> {
     /**
      * Generar un JWT (access token) para un usuario autenticado
      * @param {Object} user - Datos básicos del usuario autenticado
      * @param {number} user.id - ID del usuario
      * @param {string} user.email - Email del usuario
      * @param {UserRole} user.role - Rol del usuario (ADMIN, REGULAR, etc.)
-     * @return {Promise<{ access_token: string }>} Token JWT firmado
+     * @return {Promise<any>} Objeto con access_token, refresh_token y datos del usuario
      *
      * El JWT contiene el payload: { email, sub: id, role }
      * Expira en 15 minutos (configurado en auth.module.ts)
      */
-    this.logger.log(`Generando JWT para usuario: ${user.email}`);
+    this.logger.log(`Generando tokens para usuario ${user.email}...`);
 
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    // Generar ambos tokens
+    const { access_token, refresh_token } = await this.generateTokens(user);
+
+    // Preparar el payload seguro del usuario (sin contraseña etc)
+    const safeUser = await this.usersService.findOne(user.id);
 
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token,
+      refresh_token,
+      user: {
+        id: safeUser.id,
+        email: safeUser.email,
+        name: safeUser.name,
+        role: safeUser.role,
+        // Agrega aquí otros campos del usuario que quieras exponer al frontend
+      },
     };
   }
 
@@ -218,5 +226,103 @@ export class AuthService {
     );
 
     return { message: 'Contraseña actualizada correctamente' };
+  }
+  /**
+   * Generar tokens (access y refresh)
+   */
+  async generateTokens(user: any) {
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      role: user.role,
+    };
+
+    // Access token (expira en 15 minutos)
+    const access_token = this.jwtService.sign(payload, {
+      expiresIn: process.env.JWT_ACCESS_EXPIRATION || ('15m' as any),
+    });
+
+    // Refresh token (expira en 7 días)
+    const refresh_token = this.jwtService.sign(payload, {
+      expiresIn: process.env.JWT_REFRESH_EXPIRATION || ('7d' as any),
+      secret: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET, // Usar secreto diferente
+    });
+
+    return {
+      access_token,
+      refresh_token,
+    };
+  }
+
+  /**
+   * Refrescar access token usando refresh token
+   */
+  async refreshToken(refreshToken: string) {
+    try {
+      // Verificar el refresh token
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+      });
+
+      // Obtener usuario actualizado
+      const user = await this.usersService.findOne(payload.sub);
+
+      if (!user || user.status !== UserStatus.ACTIVE) {
+        throw new UnauthorizedException('Usuario no encontrado o inactivo');
+      }
+
+      // Generar nuevo access token
+      const newPayload = {
+        email: user.email,
+        sub: user.id,
+        role: user.role,
+      };
+
+      const access_token = this.jwtService.sign(newPayload, {
+        expiresIn: '15m',
+      });
+
+      return {
+        access_token,
+        refresh_token: refreshToken, // Retornar el mismo refresh token
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Refresh token inválido o expirado');
+    }
+  }
+  async getUserData(userId: number) {
+    const user = await this.usersService.findOne(userId);
+
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    // Retornar solo datos seguros (sin password)
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      phone: user.phone,
+      age: user.age,
+      avatar: user.avatar,
+      rate: user.rate,
+      status: user.status,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+
+  /**
+   * Verificar refresh token JWT
+   */
+  async verifyRefreshToken(refreshToken: string) {
+    try {
+      return this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+      });
+    } catch (error) {
+      throw new UnauthorizedException('Refresh token inválido');
+    }
   }
 }
