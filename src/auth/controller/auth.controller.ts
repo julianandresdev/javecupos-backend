@@ -207,7 +207,9 @@ export class AuthController {
   }
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Body('refreshToken') refreshToken: string, @Request() req) {
+  async refresh(@Body('refreshToken') bodyToken: string, @Request() req) {
+    const refreshToken = bodyToken || req.cookies?.['refreshToken'];
+
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token no proporcionado');
     }
@@ -360,6 +362,54 @@ export class AuthController {
     }
   }
 
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async changePassword(
+    @CurrentUser('id') userId: number,
+    @Body() dto: { currentPassword: string; newPassword: string },
+  ) {
+    /**
+     * Cambiar contraseña estando autenticado
+     * @route POST /auth/change-password
+     * @param {number} userId - ID del usuario extraído del JWT
+     * @param {Object} dto - { currentPassword, newPassword }
+     * @return {Promise<{ message: string }>} Confirmación de cambio
+     * @throws {BadRequestException} Si faltan datos o la contraseña actual es inválida
+     *
+     * Flujo:
+     * 1. Validar que se envíen currentPassword y newPassword
+     * 2. Delegar la validación y cambio de contraseña al AuthService
+     * 3. Revocar todos los refresh tokens del usuario (cerrar sesiones)
+     */
+    if (!dto || !dto.currentPassword || !dto.newPassword) {
+      throw new BadRequestException(
+        'Se requiere currentPassword y newPassword',
+      );
+    }
+
+    try {
+      // El AuthService debe validar la contraseña actual, hashear la nueva y guardar.
+      await this.authService.changePassword(
+        userId,
+        dto.currentPassword,
+        dto.newPassword,
+      );
+
+      // Por seguridad, revocar todas las sesiones activas del usuario
+      await this.refreshTokenService.revokeAllRefreshTokens(userId);
+
+      return {
+        message:
+          'Contraseña cambiada correctamente. Por favor inicia sesión nuevamente.',
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        error?.message || 'No se pudo cambiar la contraseña',
+      );
+    }
+  }
+  
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() dto: ResetPasswordDto) {

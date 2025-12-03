@@ -176,6 +176,21 @@ export class CuposService {
           `Los asientos disponibles (${updateCupoDto.asientosDisponibles}) no pueden exceder los asientos totales (${cupo.asientosTotales})`,
         );
       }
+    } else if (
+      updateCupoDto.asientosTotales !== undefined &&
+      updateCupoDto.asientosTotales !== cupo.asientosTotales
+    ) {
+      // Si cambia el total de asientos y NO se especifica disponibles, ajustar la diferencia
+      const delta = updateCupoDto.asientosTotales - cupo.asientosTotales;
+      const nuevosDisponibles = cupo.asientosDisponibles + delta;
+
+      if (nuevosDisponibles < 0) {
+         throw new BadRequestException(
+           `No se pueden reducir los asientos totales a ${updateCupoDto.asientosTotales} porque ya hay reservas activas que exceden esa capacidad.`,
+         );
+      }
+      
+      cupo.asientosDisponibles = nuevosDisponibles;
     }
 
     // Validar que horaSalida siga siendo futura si se actualiza
@@ -308,9 +323,19 @@ export class CuposService {
       horaSalida = cupo.horaSalida;
     } else if (typeof cupo.horaSalida === 'string') {
       // Si es string (viene de BD como varchar), parsearlo
-      // El string puede venir en formato ISO (UTC) o en otro formato
-      // new Date() interpreta ISO strings correctamente
-      const parsed = new Date(cupo.horaSalida);
+      // SQLite/TypeORM pueden guardar la fecha sin la 'Z' (ej: "2024-11-20 15:00:00")
+      // Asumimos que lo que está en BD siempre es UTC (porque el frontend envía UTC)
+      let dateString = cupo.horaSalida as string;
+      
+      // Reemplazar espacio por T si es necesario (formato SQL estándar)
+      dateString = dateString.replace(' ', 'T');
+      
+      // Agregar Z si no la tiene para forzar UTC
+      if (!dateString.endsWith('Z') && !dateString.includes('+')) {
+        dateString += 'Z';
+      }
+
+      const parsed = new Date(dateString);
       // Validar que la fecha sea válida
       if (isNaN(parsed.getTime())) {
         this.logger.warn(`Fecha inválida en horaSalida para cupo ${cupo.id}: ${cupo.horaSalida}`);
@@ -452,8 +477,20 @@ export class CuposService {
 
     changes.forEach((change) => {
       if (fieldsToShowValue.includes(change.readableName)) {
-        // Mostrar el campo y el nuevo valor amigable (puedes formatear fechas, etc. si lo deseas)
-        detailedChanges.push(`"${change.readableName}" → "${change.newValue}"`);
+        let displayValue = change.newValue;
+
+        // Formatear fechas para que sean legibles
+        if (
+          change.readableName === 'hora de salida' ||
+          change.readableName === 'fecha de salida'
+        ) {
+          const dateValue =
+            displayValue instanceof Date ? displayValue : new Date(displayValue);
+          displayValue = formatBogotaDate(dateValue, 'dd/MM/yyyy hh:mm a');
+        }
+
+        // Mostrar el campo y el nuevo valor amigable
+        detailedChanges.push(`"${change.readableName}" → "${displayValue}"`);
       } else {
         // Solo nombre del campo
         simpleChanges.push(`"${change.readableName}"`);

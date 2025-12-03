@@ -26,7 +26,7 @@ export class NotificationsController {
    */
   @Get()
   async getMyNotifications(@Request() req): Promise<NotificationEntity[]> {
-    const userId = req.user.sub;
+    const userId = req.user.id;
     return this.notificationsService.getUserNotifications(userId);
   }
 
@@ -35,7 +35,7 @@ export class NotificationsController {
    */
   @Get('pending')
   async getPendingNotifications(@Request() req): Promise<NotificationEntity[]> {
-    const userId = req.user.sub;
+    const userId = req.user.id;
     return this.notificationsService.getPendingNotifications(userId);
   }
 
@@ -44,7 +44,7 @@ export class NotificationsController {
    */
   @Get('unread-count')
   async getUnreadCount(@Request() req): Promise<{ count: number }> {
-    const userId = req.user.sub;
+    const userId = req.user.id;
     const count = await this.notificationsService.getUnreadCount(userId);
     return { count };
   }
@@ -57,7 +57,7 @@ export class NotificationsController {
     @Param('id') notificationId: number,
     @Request() req,
   ): Promise<NotificationEntity> {
-    const userId = req.user.sub;
+    const userId = req.user.id;
     return this.notificationsService.markAsRead(notificationId, userId);
   }
 
@@ -67,7 +67,7 @@ export class NotificationsController {
   @Patch('mark-all-read')
   @HttpCode(HttpStatus.NO_CONTENT)
   async markAllAsRead(@Request() req): Promise<void> {
-    const userId = req.user.sub;
+    const userId = req.user.id;
     await this.notificationsService.markAllAsRead(userId);
   }
 
@@ -80,7 +80,7 @@ export class NotificationsController {
     @Param('id') notificationId: number,
     @Request() req,
   ): Promise<void> {
-    const userId = req.user.sub;
+    const userId = req.user.id;
     await this.notificationsService.deleteNotification(notificationId, userId);
   }
 
@@ -94,7 +94,7 @@ export class NotificationsController {
     @Request() req,
   ): Promise<NotificationEntity> {
     // Por defecto, crear para el usuario autenticado
-    const userId = createNotificationDto.userId || req.user.sub;
+    const userId = createNotificationDto.userId || req.user.id;
 
     return this.notificationsService.createNotification(
       userId,

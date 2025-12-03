@@ -16,6 +16,10 @@ import { BookingsModule } from './bookings/bookings.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SeedModule } from './database/seeds/seed.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { FavoritesModule } from './favorites/favorites.module';
+import { FavoriteEntity } from './favorites/entities/favorites.entity';
+import { RatingsModule } from './ratings/ratings.module';
+import { RatingEntity } from './ratings/entities/rating.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -41,6 +45,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
             NotificationEntity,
             RefreshTokenEntity,
             TokenResetEntity,
+            FavoriteEntity,
+            RatingEntity,
           ],
         };
 
@@ -72,6 +78,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     CuposModule,
     BookingsModule,
     NotificationsModule,
+    FavoritesModule,
+    RatingsModule,
     SeedModule,
   ],
   controllers: [AppController],

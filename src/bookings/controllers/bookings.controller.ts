@@ -30,6 +30,11 @@ export class BookingsController {
     return this.bookingsService.myBookings(req.user.id);
   }
 
+  @Get(':id')
+  async findOne(@Param('id') id: string, @Request() req) {
+    return this.bookingsService.findOne(+id, req.user.id);
+  }
+
   @Put(':id/cancel')
   async cancel(@Param('id') id: string, @Request() req) {
     return this.bookingsService.cancel(+id, req.user.id);
