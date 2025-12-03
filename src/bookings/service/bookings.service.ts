@@ -151,6 +151,26 @@ export class BookingsService {
     return myBookings;
   }
 
+  async findOne(id: number, userId: number) {
+    const booking = await this.bookingRepository.findOne({
+      where: { id },
+      relations: ['cupo', 'cupo.conductor', 'user'],
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Reserva no encontrada');
+    }
+
+    // Validar que el usuario sea el dueño de la reserva o el conductor del cupo
+    if (booking.userId !== userId && booking.cupo.conductorId !== userId) {
+      throw new UnauthorizedException(
+        'No tienes permiso para ver esta reserva',
+      );
+    }
+
+    return booking;
+  }
+
   async cancel(id: number, userId: number) {
     const booking = await this.bookingRepository.findOne({
       where: { id, userId },

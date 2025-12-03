@@ -325,4 +325,52 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token inválido');
     }
   }
+
+  async changePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    /**
+     * Cambiar la contraseña de un usuario autenticado
+     * @param {number} userId - ID del usuario
+     * @param {string} currentPassword - Contraseña actual en texto plano
+     * @param {string} newPassword - Nueva contraseña en texto plano
+     * @return {Promise<void>} No retorna nada si el cambio es exitoso
+     * @throws {UnauthorizedException} Si la contraseña actual es incorrecta
+     *
+     * Este método valida la contraseña actual, hashea la nueva y la guarda.
+     */
+
+    this.logger.log(`Validando contraseña actual para usuario ID: ${userId}`);
+
+    const user = await this.usersService.findOne(userId);
+
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    // Validar contraseña actual
+    const isPasswordValid = await this.validateUser(
+      user.email,
+      currentPassword,
+    );
+
+    if (!isPasswordValid) {
+      this.logger.warn(
+        `Contraseña actual incorrecta para usuario ID: ${userId}`,
+      );
+      throw new UnauthorizedException('La contraseña actual es incorrecta');
+    }
+
+    // Hashear nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Actualizar contraseña en la base de datos
+    await this.usersService.update(userId, { password: hashedPassword });
+
+    this.logger.log(
+      `Contraseña cambiada exitosamente para usuario ID: ${userId}`,
+    );
+  }
 }

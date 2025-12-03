@@ -80,7 +80,7 @@ export class UpdateUserDto {
   password?: string; // Contraseña del usuario
 
   @IsOptional()
-  @IsNumber({}, { message: 'El teléfono debe ser un número' })
+  @IsString({ message: 'El teléfono debe ser una cadena de texto' })
   phone?: string; // Número de teléfono del usuario
 
   @IsOptional()
